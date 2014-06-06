@@ -1,3 +1,5 @@
+//不用在输入输出时引入library
+//不用写main方法
 //不用在每句话后写; 如果要在一行代码中写多个语句则必须写;
 //不用编写头文件(.h)和代码文件(.m)
 
@@ -18,7 +20,8 @@ let label = "The width is"
 let width = 94
 let widthLabel  = label  + String(width)
 
-//另一种方式，使用\(variable)
+//另一种方式（String Interpolation），使用\(variable)
+//在括号中不可以再出现转义的单引号或反斜杠等，并且不能包含回车和换行
 let appleCount = 3
 let applePhrase = "I have \(appleCount) apples"
 
@@ -45,6 +48,10 @@ let hexadecimalInteger = 0x11
 //十六进制使用p表示2的此方
 0xFp2  //60.0
 
+//Float精确到小数点后6位，Decimal则可以精确到小数点后15位
+//定义浮点数时如果不显示指定类型，Swift总是会使用Double
+//当把浮点数转换为整形时，会直接截断小数位值
+
 //可以使用定义变量为元组，元组中可以包含多个且不同的类型，如：
 let http404Error = (404, "Not Found");
 
@@ -60,9 +67,30 @@ let http200Error = (statusCode: 200, description: "OK")
 //可以使用元组.名字的方法取得元组信息
 println(http200Error.statusCode)
 
-//Float精确到小数点后6位，Decimal则可以精确到小数点后15位
-//定义浮点数时如果不显示指定类型，Swift总是会使用Double
-//当把浮点数转换为整形时，会直接截断小数位值
+//使用元组定义时，元组的值会分解为对应变量的值
+let (x,y) = (1,2)  // 等价于 let x = 1; let y = 2;
+
+let dollarSign = "\x24"        // $,   Unicode scalar U+0024
+let blackHeart = "\u2665"      // ♥,   Unicode scalar U+2665
+let sparklingHeart = "\U0001F496"  //  ,  Unicode scalar U+1F496
+
+//String是值类型，如果你创建一个新的String，当传递到函数方法中，或设定为变量或常量的值时会被复制一份
+//在Objective-C中，NSString是引用类型
+//创建空String
+var emptyString = "";
+var emptyString2 = String();
+//判断String是否为空
+emptyString.isEmpty();
+//计算String长度使用countElements
+//countElements以Unicode字符统计长度，在Objective-C中NSString的length方法则是以UTF-16方式，所以两者的结果会不同
+//在Swift中对应NSString中的length方法，需要使用uft16count方法
+xx.countElements()
+//使用==判断字符串是否相等，当两个字符串包含同样的字符并且字符出现的顺序一直则视为相等
+//String的hasPrefix和hasPrefix方法可以进行字符串的逐字匹配，判断其是否以某些字符开始或结束（相当于C#中的StartWith和Endwith）
+//String的大小写转换使用uppercaseString和lowercaseString属性
+let normal = "hello,world";
+let upperNormal = normal.uppercaseString
+let lowerNormal = normal.lowercaseString
 
 //使用可空操作符?时，如果?前面的值不为nil，则继续执行?后面的操作，如果为nil，则跳过?后面的操作不执行，避免crash
 let optionalSquare = Square?=Square(sideLength:2.5, name: "test")
@@ -214,7 +242,8 @@ numbers.map({ number in 3 * number})
 sort([1,5,3,12,2]) {$0 > $1}
 
 //定义类使用class
-class Shape {
+c
+lass Shape {
 	var numberOfSides = 0
 	func simpleDescription() -> String {
 		return "Shape simpleDescription"
