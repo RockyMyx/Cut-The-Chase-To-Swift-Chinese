@@ -92,6 +92,15 @@ let normal = "hello,world";
 let upperNormal = normal.uppercaseString
 let lowerNormal = normal.lowercaseString
 
+//Swift中的String有三种形式：UTF8，UTF-16和以21位unicode字符组成
+//访问String的UTF8形式的字符可以使用utf8属性，utf8属性是UTF8View类型，是UInt8值的集合
+let dogString = "Dog!"
+for codeUnit in dogStrng.utf8 {
+	println("\(codeUnit)")  //68 111 103 33
+}
+//访问String的UTF16形式的字符可以使用utf16属性，utf16属性是UTF16View类型，是UInt16值的集合
+//访问String的以21位unicode字符组成形式的字符可以使用unicodeScalars属性，unicodeScalars属性是UnicodeScalars类型
+
 //使用可空操作符?时，如果?前面的值不为nil，则继续执行?后面的操作，如果为nil，则跳过?后面的操作不执行，避免crash
 let optionalSquare = Square?=Square(sideLength:2.5, name: "test")
 let sideLength = optionalSquare?.sideLength;
@@ -106,6 +115,7 @@ if strValue {
 //使用typealias定义类型别名，如：
 typealias myInt = UInt16
 
+//Array只能存储同一类型的值，而Objective-C中的NSArray和NSMutableArray可以存储任何类型的object
 //创建Array
 var list = ["a", "b", "c"];
 //使用索引访问
@@ -113,6 +123,37 @@ list[0]
 //创建空Array
 let emptyArray = String[]();
 let emptyArray = [];
+
+//泛型数组
+Array<SomeType> //等价于SomeType[]
+
+//获得数组元素个数使用count方法
+//判断数组是否为空使用isEmpty属性
+//添加数组元素使用append方法，或者直接使用+=，+=后不仅可以跟数组对应类型的值，也可以直接跟一个同类型的数组
+//可以使用...操作符批量替换数组中的元素，且替换的数量可以和边界表示的数量不一致
+var list = [1,2,3,4,5,6,7,8,9]
+list[2,5] = [10] //list = [1,2,10,7,8,9]
+//在数组的某个位置插入元素
+list.insert(10, atIndex: 0);
+//在数组的某个位置移除元素，并返回该元素
+list.removeAtIndex(0);
+//移除数组的最后一个元素，并返回该元素，相对于removeAtIndex可以避免获取数组的长度，效率更高
+list.removeAtLast(0);
+
+//遍历数组时如果想同时获取元素的索引则可以使用enumerate方法
+for(index, value) in enumerate(list) {
+	println("Item \(index) : \(value)");
+}
+
+//Array提供构造函数初始化，可以在其中指定数组的个数及类型的默认值
+var zeroDoubles = Double[](count: 3, repeatedValue: 0.0)  //[0.0, 0.0, 0.0]
+//也可以让Swift自行推断类型
+var anotherDoubles = Array(count: 3, repeatedValue: 2.5) //[2.5, 2.5, 2.5]
+//同类型的数组之间可以通过+组合元素
+var sixDoubles = zeroDoubles + anotherDoubles; ////[0.0, 0.0, 0.0, 2.5, 2.5, 2.5]
+
+//如果设置数组为constant，则不可以改变其大小，但是可以为某个索引设置新值
+//如果设置字典为constant，则表示不可以改变字典的任何内容
 
 //创建Dictionary
 var dict = [
@@ -122,10 +163,27 @@ var dict = [
 //创建空Dictionary
 let emptyDict = Dictionary<String, Float>();
 let emptyDict = [:]
+//修改字典中特定键所对应的值：updateValue(forKey:)，当键存在时可以更新值，否则为字典创建一个键值
+dict.updateValue(5, forKey:"a"); //返回类型为可空值类型，如键对应没有值则为nil，本例为1
+//使用索引访问字典键的值返回类型也为optional value
+//两种方法移除字典中的某个键值对
+dict["a"] = nil;
+dict.removeValueForKey("a")
+//使用keys和values属性获取字典的键集合和值集合，并且可以通过Array构造函数构建数组
+Array(dict.keys)
+Array(dict.values)
 
-//循环时括号可以不写
+//遍历字典时，结果的顺序不一定是字典的添加顺序
+//循环遍历时括号可以不写
 for xx in xxx {
 	...
+}
+//如果不关心遍历的值，可以使用下划线代替
+let base = 3
+let power = 10
+let answer = 1
+for _ in 1...power{
+	answer *= base
 }
 
 //类型后紧跟?表示可为nil，即空值
@@ -144,7 +202,7 @@ let i = 1
 if i { ... } //error
 if i == 1 { ... } //ok
 
-//switch接受任何类型的参数，且分支语句不用break，必须有default分支
+//switch接受任何类型的参数，且分支语句不用break
 
 //使用for..in遍历字典
 let numDict = [
@@ -242,8 +300,7 @@ numbers.map({ number in 3 * number})
 sort([1,5,3,12,2]) {$0 > $1}
 
 //定义类使用class
-c
-lass Shape {
+class Shape {
 	var numberOfSides = 0
 	func simpleDescription() -> String {
 		return "Shape simpleDescription"
