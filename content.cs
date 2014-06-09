@@ -205,6 +205,46 @@ dict.removeValueForKey("a")
 Array(dict.keys)
 Array(dict.values)
 
+//在复制字典时，如果键/值是值类型，则会被创建相同的副本，如果是引用类型，则会复制引用
+var ages = ["Peter": 23,  "Wei ": 35,  "Ani sh": 65,  "Katya": 19]
+var copiedAges = ages
+copiedAges["Peter"] = 24
+println(ages["Peter"]) //23
+//数组只有当出现长度被修改时，行为才会和字典一致，否则当做引用类型处理
+var a = [1,  2,  3]
+var b = a
+var c = b
+//1
+println(a[0])
+println(b[0])
+println(c[0])
+//改变值
+a[0] = 10
+println(a[0]) //10
+println(b[0]) //10
+println(c[0]) //10
+//改变长度并改变值
+a.append(4)
+a[0] = 777
+println(a[0]) //777
+println(b[0]) //10
+println(c[0]) //10
+//如果一个数组多个变量引用，可以使用unshare方法复制数组，并确保数组唯一性（但不可用于constant数组）
+//如果数组只有一个引用，则unshare不会产生复制操作
+b.unshare()
+b[0] = 100
+println(a[0]) //777
+println(b[0]) //100
+println(c[0]) //10
+//判断数组是否拥有相同的元素使用===和!==
+//强制数组进行复制使用copy方法
+var names = ["Mohsen",  "Hilary",  "Justyn",  "Amy",  "Rich",  "Graham",  "Vic"]
+var copiedNames = names.copy()
+copiedNames[0] = "Mo"
+println(names[0]) //"Mohsen"
+//如果要确保数组内容引用的唯一性，则使用unshare
+//copy方法总是会复制数组，即使在数组已经使用unshare的情况下
+
 //遍历字典时，结果的顺序不一定是字典的添加顺序
 //循环遍历时括号可以不写
 for xx in xxx {
@@ -495,7 +535,7 @@ var shape = SomeClass();
 shape.simpleDescription();
 
 //类中使用deinit()：在对象回收之前的一些清理工作
-//类继承及方法重写与C#语法一致
+//类继承及方法重写与C#语法一致，初始化使用init，使用self代表当前类
 class Square: Shape {
 	var sideLength: Double;
 	init(sideLength: Double, name: String){
@@ -507,9 +547,8 @@ class Square: Shape {
 	override simpleDescription() -> String {
 		return "Square simpleDescription"
 	}
-	
-	//定义属性
-	var perimeter: Double{
+
+	var perimeter: Double {
 		get {
 			return 4.0 * sideLength
 		}
@@ -518,6 +557,65 @@ class Square: Shape {
 		}
 	}
 }
+
+//属性包括：
+//1、Stored Property：保存实例的变量或常量值（定义在class和struct中）
+struct Fi xedLengthRange {
+    var firstValue: Int
+    let length: Int
+}
+var rangeOfThreeItems = FixedLengthRange(firstValue: 0, length: 3)
+rangeOfThreeItems.firstValue = 6
+//当定义的结构体实例是常量，则不可以修改其变量属性，因为struct是值类型，当定义为constant时，其所有属性也为constant
+//对于类来说，此规则不适用，因为类是引用类型
+let rangeOfThreeItems = FixedLengthRange(firstValue: 0, length: 3)
+rangeOfThreeItems.firstValue = 6 //error
+//有一种特殊的Stored Property叫做Lazy Property，即不在定义时赋值，而是在第一次使用时计算值，标注为@lazy，并且只能定义为var
+//Lazy Property适用情况：初始值依赖于外部一个的未知变量值；值的计算比较消耗资源，仅仅在使用时才进行计算
+class DataImporter {
+	var fileName = "data.txt"
+}
+class DataManager {
+	@lazy var importer = DataImporter()
+	var data = String[]()
+}
+let manager = DataManager()
+manager.data += "Some data"
+manager.data += "Some more data"
+//DataImporter实例未创建
+println(manager.importer.fileName)
+//DataImporter实例已创建
+
+//2、Computed Property：有计算逻辑的属性（定义在class、struct和enum中）
+struct Point {
+	var x = 0. 0,  y = 0. 0
+}
+struct Rect {
+	var origin = Point()
+	var size = Size()
+	var center: Point {
+		get {
+			let centerX = origin.x + (size.width / 2)
+			let centerY  = origin.y + (size. height / 2)
+			return Point(x: centerX,  y: centerY )
+		}
+		set(newCenter) {
+			origin.x = newCenter.x -  (size.width / 2)
+			origin.y = newCenter.y -  (size.height / 2)
+		}
+		//newCenter可以省略不写，用newValue代替
+		/*set(newValue) {
+			origin.x = newValue.x -  (size.width / 2)
+			origin.y = newValue.y -  (size.height / 2)
+		}*/
+	}
+	var width = 0.0, height = 0.0
+	//定义只读属性，可以省略get
+	var size: Double {
+		return width * height
+	}
+}
+//3、Type Property：属性和自己的类型相关联
 
 class EquilateralTriangle : Shape {
 	var sideLength: Double;
@@ -575,8 +673,10 @@ counter.incrementBy(2, numberofTimes: 7)
 
 //使用enum定义枚举，枚举中可以定义方法，case关键字表示后面紧跟一行新的枚举值，一行可以定义多个枚举值
 enum Card: Int {
-	//初始值类型设置为1，则后面的枚举值会递增赋值
-	//如果不设置或设置字符串会是什么值？
+	//Swift中的枚举值不会默认为0,1,2...，而是需要手动设置
+	//Ace = 1表示枚举的初始值（Raw Value），当初始值为Int时，后面的枚举值会递增赋值
+	//可以使用Card.Ace.toRaw()访问初始值
+	//通过Card.fromRaw(7)找到枚举中对应值的项，返回值为Optional Value
 	case Ace = 1
 	case Two,  Three,  Four,  Five,  Six,  Seven,  Eight,  Nine,  Ten
 	case Jack,  Queen,  King
@@ -602,7 +702,51 @@ var myCard = Rank.Ace
 //再次赋值时可以省略枚举名
 myCard = .Jack
 
+//可以为枚举类型指定任何类型的值，且每个类型的值类型也可以不同
+enum Barcode {
+	case UPCA(Int, Int, Int)
+    case QRCode(String)
+}
+var productBarcode = Barcode.UPCA(8, 85909_51226, 3)
+
+//提取枚举元组值
+switch productBarcode {
+	case .UPCA(let numberSystem, let identifier, let check): 
+		println("UPCA with value of \(numberSystem),, \(identifier), \(check)")
+	case .QRCode(let productCode):
+		println("QR code with value of \(productCode)")
+}
+//如果要提取的值都是常量或者变量，则可以提到枚举值前面
+switch productBarcode {
+	case let .UPCA(numberSystem, identifier, check): 
+		println("UPCA with value of \(numberSystem),, \(identifier), \(check)")
+	case let .QRCode(productCode):
+		println("QR code with value of \(productCode)")
+}
+
 //使用struct定义结构体，struct是值类型，class是引用类型
+
+//在Swift中，class和struct非常类似：
+//1、都可以定义属性
+//2、都可以定义函数
+//3、都可以定义索引访问值
+//4、都可以在默认实现上进行功能扩展
+//5、都可以实现protocol
+//6、构建实例对象都使用"名字()"的形式，访问属性方法都使用.语法
+
+//class中独有的特性：
+//1、类可以继承
+//2、类可以在运行时进行类型转换
+//3、可以使用deinit方法释放类的示例以及关联的相关资源
+//4、类是引用类型，可以指定多个类的实例
+
+//struct中独有的特性：
+//1、struct默认拥有由成员组成的构造器
+struct Resolution {
+    var width = 0
+    var height = 0
+}
+var vga = Resolution(width: 640, height: 480)
 
 //接口定义
 //mutating keyword in the declaration of Simpl eStructure to mark a
