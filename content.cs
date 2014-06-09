@@ -101,6 +101,38 @@ for codeUnit in dogStrng.utf8 {
 //访问String的UTF16形式的字符可以使用utf16属性，utf16属性是UTF16View类型，是UInt16值的集合
 //访问String的以21位unicode字符组成形式的字符可以使用unicodeScalars属性，unicodeScalars属性是UnicodeScalars类型
 
+let anotherPoint = (2,  0)
+switch anotherPoint {
+	//表示匹配任何y值为0的点，并且定义x为常量，值为相应匹配的值2
+	case (let x, 0):
+		println("on the x-axi s w i th an x val ue of \(x)")
+	case (0,  let y):
+	    printl n("on the y-axi s w i th a y val ue of \(y)")
+	case let (x, y):
+	    println("somew here el se at (\(x),  \(y))")
+}
+
+//还可以在case后加where进行额外的判断
+case let(x, y) where x == y : ...
+//在switch中有continue，break，fallthrough和return四种控制循环的方式
+//如果case语句没有穷举所有情况，则必须加default，否则可以省略
+//fallthrough会在执行完当前case语句后自动跳到下一个case语句或default中
+
+//可以在循环语句中加入占位符进行控制
+gameLoop: while square ! = finalSquare {
+    if ++diceRoll  == 7 { diceRoll  = 1 }
+    switch square + diceRoll  {
+	    case finalSquare:
+	        break gameLoop
+	    case let new Square where new Square > final Square:
+	        continue gameLoop
+		default:
+			square += diceRoll
+			square += board[square]
+	}
+}
+
+
 //使用可空操作符?时，如果?前面的值不为nil，则继续执行?后面的操作，如果为nil，则跳过?后面的操作不执行，避免crash
 let optionalSquare = Square?=Square(sideLength:2.5, name: "test")
 let sideLength = optionalSquare?.sideLength;
@@ -235,12 +267,21 @@ func greet(name: String, day: String) -> String {
 }
 greet("bob", "monday");
 
+//函数参数默认是constant，所以不可以在函数内部对参数的值进行修改，否则会导致编译错误
+//如果要修改参数的值，需要在定义函数时设置参数为var
+func greet(var name: String, day: String) -> String {
+	name = 'myx'
+	return "Hello \(name), today is \(day)";
+}
+greet("bob", "monday");
+
 //函数可以使用元组返回多个值
 func getGasPrices() -> (Double, Double, Double) {
 	return (1.00, 2.00, 3.00);
 }
 
-//使用...表示可变参数
+//使用...表示可变参数，一个函数最多只有一个可变参数，并且必须出现在函数的最后
+//如果函数中有带默认值的参数，则可变参数出现在默认值参数的后面
 func sumOf(numbers: Int...) -> Int {
 	var sum = 0;
 	for num in numbers {
@@ -248,6 +289,18 @@ func sumOf(numbers: Int...) -> Int {
 	}
 	return sum;
 }
+
+//使用inout指明参数的值在函数内部可以修改，并且当函数运行结束后，修改后的值会替换函数外部同名的变量值
+//inout参数不能被指明为var或let，不可以有默认值，不可以是可变参数
+//当传递input参数时，需要在变量名之前加&符号，表明可以被函数修改
+func swapTwoInts(inout a: Int,  inout b: Int) {
+    let temp = a
+    a = b
+    b = temp
+}
+var someInt = 1
+var anotherInt = 2
+swapTwoInts(&someInt,  &anotherInt)
 
 //函数可以嵌套
 func returnFifteen() -> Int(){
@@ -286,18 +339,142 @@ func lessThanTen(number: Int) -> Bool {
 
 hasAnyMatches([1,5,8,10,34,11,62,4], lessThanTen);
 
-//函数可以编写为匿名闭包，使用in分隔参数和返回类型
+//全局函数是一个拥有名字但不捕获任何值的闭包
+//嵌套函数是一个拥有名字并且能够捕获包含函数中的值的闭包
+//闭包表达式是匿名的并且可以在包含的上下文中捕获值
+
+//闭包表达式格式，使用in分隔函数定义和实现：{(parameters) -> return type in statements }
+//闭包表达式中支持变量和常量参数，支持inout参数，支持可变类型参数（需在最后），支持元组参数和返回类型，不支持默认值参数
+
 numbers.map({
 	(number: Int) -> Int in
 	let result = 3* number;
 	return result;
 })
 
+let names = ["Chris",  "Alex",  "Ewa",  "Barry",  "Daniella"]
+reversed = sort(names, { (s1: String, s2: String) -> Bool in return s1 > s2 })
+
 //更加简洁的闭包：当已知闭包的类型时，比如委托回调，可以忽略参数类型和返回值类型
 numbers.map({ number in 3 * number})
+reversed = sort(names, { s1, s2 in return s1 > s2})
 
-//如果闭包是函数的最后一个参数，则可以紧跟括号  ??
-sort([1,5,3,12,2]) {$0 > $1}
+//闭包自动提供参数的缩写，可以用$0,$1,$2...来表示参数
+sort(names, {$0 > $1})
+
+//操作符函数
+//Swift中字符串类型定义了String相关的实现，如>符号表示两个比较两个String，并返回Bool，这正好匹配sort函数，所以可以简写为：
+sort(names, >)
+
+//如果想在函数参数中使用闭包表达式并且闭包表达式很长，则可以使用后缀闭包
+//后缀闭包是一个写在调用函数括号后的闭包表达式
+func someFunctionThatTakesAClosure(closure: () -> ()) {
+    //function body
+}
+//不使用后缀闭包调用函数
+someFunctionThatTakesAClosure({
+	//closure's body
+})
+//使用后缀闭包调用函数
+someFunctionThatTakesAClosure(){
+	//trailing closure's body
+}
+//使用后缀闭包调用sort
+sort(names) {$0 > $1}
+
+//在闭包表达式是函数的唯一参数并且使用后缀闭包的情况下，可以省略调用时的()，如Array的map函数
+let digitNames = [
+    0: "Zero",  1: "One",  2: "Two",    3: "Three",  4: "Four",
+    5: "Five",  6: "Six",  7: "Seven",  8: "Eight",  9: "Nine"
+]
+let numbers = [16,  58,  510]
+let strings = numbers.map {
+	//number的类型可以隐式推断
+	(var number) -> String in
+	var output = ""
+	while number > 0 {
+		output = digitNames[number % 10]! + output
+		number /= 10
+	}
+	return output
+}
+
+//函数如果没有返回值可以不写，但实际上Swift内部会处理函数返回值为Void，这是一个没有元素的元组，即()
+
+//在函数定义时，为了指明参数，可以为参数定义一个名字
+func join(s1: String,  s2: String,  joiner: String) -> String {
+	return s1 + joiner + s2
+}
+join("hello",  "world",  ", ")  //调用时对应的参数不清楚
+
+func join(string s1: String, toString s2: String, withJoiner joiner: String) -> String {
+	return s1 + joiner + s2
+}
+join(string: "hello", toString: "world", withJoiner: ", ")  //当需要明确调用时的参数作用时才使用此方法
+
+//可以为函数参数指定默认值，Swift会为有默认值的参数自动创建名字
+func join(s1: String,  s2: String,  joiner: String = ", ") -> String {
+	return s1 + joiner + s2
+}
+join("hello",  "world",  joiner: ", ") 
+
+//如果指明参数名字的时候和参数的: 名字相同，则不必重复写两次参数的名字，可以使用#前缀代替
+func containsCharacter(#string: String,  #characterToFind: Character) -> Bool  {
+	for character in string {
+        if character == characterToFind {
+            return true
+		}
+	}
+    return false
+}
+//两种调用方式皆可
+//let containsAVee = containsCharacter("aardvark", "v")
+//let containsAVee = containsCharacter(string: "aardvark", characterToFind: "v")
+
+//类似于C#中委托，Swift中可以定义一个变量或者常量表示拥有特定参数类型和返回值的函数
+func addTwoInts(firstInt: Int, secondInt: Int) -> Int {
+	return firstInt + secondInt
+}
+var mathFunction: (Int, Int) -> Int = addTwoInts
+//在调用时可以使用：
+mathFunction(2,3)
+//可以将委托赋值为任何符合参数和返回类型约束的函数
+func multiplyTwoInts(firstInt: Int, secondInt: Int) -> Int {
+	return firstInt * secondInt
+}
+mathFunction = multiplyTwoInts
+
+//类似地，可以使用“委托”作为函数的参数
+func printMathResult(mathFunction: (Int, Int) -> Int, a: Int, b: Int) {
+	println(mathFunction(a, b))
+}
+printMathResult(addTwoInts, 1, 2)
+
+//可以使用函数作为另一个函数的返回类型
+func stepForward(input: Int) -> Int {
+	return input + 1
+}
+func stepBackward(input: Int) -> Int {
+	return input - 1
+}
+func chooseStepFunction(backwards: Bool) -> (Int) -> Int {
+    return backwards ? stepBackward : stepForward
+}
+
+var currentValue = 3
+let moveNearerToZero = chooseStepFunction(currentValue > 0)
+while currentValue ! = 0 {
+    println("\(currentVal ue). . .  ")
+    currentValue = moveNearerToZero(currentValue)
+}
+println("zero! ")
+
+//可以使用在函数这种定义并使用函数（函数中定义的函数在外部不可访问）
+func chooseStepFunction(backwards: Bool ) -> (Int) -> Int {
+    func stepForward(input: Int) -> Int { return input + 1 }
+    func stepBackward(input: Int) -> Int { return input -  1 }
+    return backwards ? stepBackward : stepForward
+}
 
 //定义类使用class
 class Shape {
@@ -396,8 +573,8 @@ class Counter {
 var counter = Counter()
 counter.incrementBy(2, numberofTimes: 7)
 
-//使用enum定义枚举，枚举中可以定义方法
-enum Rank: Int {
+//使用enum定义枚举，枚举中可以定义方法，case关键字表示后面紧跟一行新的枚举值，一行可以定义多个枚举值
+enum Card: Int {
 	//初始值类型设置为1，则后面的枚举值会递增赋值
 	//如果不设置或设置字符串会是什么值？
 	case Ace = 1
@@ -419,6 +596,11 @@ enum Rank: Int {
 		}
 	}
 }
+
+//枚举赋值
+var myCard = Rank.Ace
+//再次赋值时可以省略枚举名
+myCard = .Jack
 
 //使用struct定义结构体，struct是值类型，class是引用类型
 
