@@ -586,7 +586,7 @@ manager.data += "Some more data"
 println(manager.importer.fileName)
 //DataImporter实例已创建
 
-//2、Computed Property：有计算逻辑的属性（定义在class、struct和enum中）
+//2、Computed Property：有计算逻辑的属性（定义在class、struct和enum中），只能定义为var
 struct Point {
 	var x = 0. 0,  y = 0. 0
 }
@@ -635,6 +635,9 @@ class EquilateralTriangle : Shape {
 	}
 }
 
+//Property observers：检测并响应属性值的变化，每次设置属性值时都会调用，即使值没有改变。还可以在子类中重写
+//willSet：在值设置前调用
+//didSet：在值设置后调用
 //如果你不想计算属性值，但仍然想在设置新值前后使用，则使用willSet和didSet
 class TriangleAndSquare {
 	init(size: Double, name: String){
