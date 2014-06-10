@@ -33,14 +33,14 @@ let applePhrase = "I have \(appleCount) apples"
 let minValue = UInt8.min;
 let maxValue = UInt8.max;
 
-//定义十进制数，不带前缀 
+//定义十进制数，不带前缀
 //定义二进制数，以0b前缀
-//定义八进制数，以0o前缀 
+//定义八进制数，以0o前缀
 //定义十六进制数，以0x前缀
 let decimalInteger = 17
-let binaryInteger = 0b10001       
-let octalInteger = 0o21           
-let hexadecimalInteger = 0x11     
+let binaryInteger = 0b10001
+let octalInteger = 0o21
+let hexadecimalInteger = 0x11
 
 //十进制使用e表示10的次方
 1.25e2 //125.0
@@ -456,7 +456,7 @@ join(string: "hello", toString: "world", withJoiner: ", ")  //当需要明确调
 func join(s1: String,  s2: String,  joiner: String = ", ") -> String {
 	return s1 + joiner + s2
 }
-join("hello",  "world",  joiner: ", ") 
+join("hello",  "world",  joiner: ", ")
 
 //如果指明参数名字的时候和参数的: 名字相同，则不必重复写两次参数的名字，可以使用#前缀代替
 func containsCharacter(#string: String,  #characterToFind: Character) -> Bool  {
@@ -714,14 +714,14 @@ var productBarcode = Barcode.UPCA(8, 85909_51226, 3)
 
 //提取枚举元组值
 switch productBarcode {
-	case .UPCA(let numberSystem, let identifier, let check): 
+	case .UPCA(let numberSystem, let identifier, let check):
 		println("UPCA with value of \(numberSystem),, \(identifier), \(check)")
 	case .QRCode(let productCode):
 		println("QR code with value of \(productCode)")
 }
 //如果要提取的值都是常量或者变量，则可以提到枚举值前面
 switch productBarcode {
-	case let .UPCA(numberSystem, identifier, check): 
+	case let .UPCA(numberSystem, identifier, check):
 		println("UPCA with value of \(numberSystem),, \(identifier), \(check)")
 	case let .QRCode(productCode):
 		println("QR code with value of \(productCode)")
@@ -806,7 +806,7 @@ func repeat<ItemType>(item: ItemType, times: Int) -> ItemType[] {
 //使用where指明泛型类的约束条件
 //除了where，还可以在泛型参数后面写冒号类名或protocol名，如使用<T: Equatable>
 Equatabl e>.
-func anyCommonElements <T, U where T: Sequence, U: Sequence, T.GeneratorType.Element: Equatable, 
+func anyCommonElements <T, U where T: Sequence, U: Sequence, T.GeneratorType.Element: Equatable,
                                    T.GeneratorType.Element == U.GeneratorType.Element> (lhs: T, rhs: U) -> Bool {
     for lhsItem in lhs {
         for rhsItem in rhs {
