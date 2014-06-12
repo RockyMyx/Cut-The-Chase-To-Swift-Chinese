@@ -636,9 +636,10 @@ class EquilateralTriangle : Shape {
 }
 
 //Property observers：检测并响应属性值的变化，每次设置属性值时都会调用，即使值没有改变。还可以在子类中重写
-//willSet：在值设置前调用
-//didSet：在值设置后调用
+//willSet：在值设置前调用，在使用值将传递一个新的constant属性值，可以在后面指定参数，如果省略的话可以在实现中使用newValue代替
+//didSet：在值设置后调用，在使用值将传递一个旧的constant属性值，可以在后面指定参数，如果省略的话可以在实现中使用oldValue代替
 //如果你不想计算属性值，但仍然想在设置新值前后使用，则使用willSet和didSet
+//willSet和didSet在属性第一次初始化时并不会调用，只有在属性值在外部进行设置时才会调用
 class TriangleAndSquare {
 	init(size: Double, name: String){
 		square = Square(sideLength: size, name: name);
