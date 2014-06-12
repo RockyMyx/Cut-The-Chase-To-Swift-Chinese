@@ -571,6 +571,7 @@ rangeOfThreeItems.firstValue = 6
 let rangeOfThreeItems = FixedLengthRange(firstValue: 0, length: 3)
 rangeOfThreeItems.firstValue = 6 //error
 //有一种特殊的Stored Property叫做Lazy Property，即不在定义时赋值，而是在第一次使用时计算值，标注为@lazy，并且只能定义为var
+//全局的变量和常量均为延迟计算的，但与Lazy Property的区别在于不用@lazy声明
 //Lazy Property适用情况：初始值依赖于外部一个的未知变量值；值的计算比较消耗资源，仅仅在使用时才进行计算
 class DataImporter {
 	var fileName = "data.txt"
@@ -616,6 +617,17 @@ struct Rect {
 	}
 }
 //3、Type Property：属性和自己的类型相关联
+//不管有多少个实例，Type Property只会有一份，Type Property用于为某个类型的所有实例创建一个全局值
+//必须为Type Property赋初始值
+//在值类型（struct和enum）中定义Type Property使用static关键字，在类中使用class定义Type Property
+class SomeStructure {
+    static var storedTypeProperty = "Some val ue. "
+    static var computedTypeProperty: Int {
+    }
+}
+class SomeClass {
+	class var computedTypeProperty: Int {
+}
 
 class EquilateralTriangle : Shape {
 	var sideLength: Double;
@@ -636,8 +648,8 @@ class EquilateralTriangle : Shape {
 }
 
 //Property observers：检测并响应属性值的变化，每次设置属性值时都会调用，即使值没有改变。还可以在子类中重写
-//willSet：在值设置前调用，在使用值将传递一个新的constant属性值，可以在后面指定参数，如果省略的话可以在实现中使用newValue代替
-//didSet：在值设置后调用，在使用值将传递一个旧的constant属性值，可以在后面指定参数，如果省略的话可以在实现中使用oldValue代替
+//willSet：传递的是一个新的constant属性值，可以指定自定义的参数名字，如果省略的话可以在实现中使用newValue代替
+//didSet：在值更新后调用，在使用值将传递一个旧的constant属性值，不可以指定自定义的参数名字，实现中使用oldValue代替原始值
 //如果你不想计算属性值，但仍然想在设置新值前后使用，则使用willSet和didSet
 //willSet和didSet在属性第一次初始化时并不会调用，只有在属性值在外部进行设置时才会调用
 class TriangleAndSquare {
@@ -664,6 +676,29 @@ println(small.triangle.sideLength);
 var large = TriangleAndSquare(size: 50, name: "small");
 println(small.triangle.sideLength);
 println(small.square.sideLength);
+
+
+class StepCounter {
+var totalSteps: Int = 0 {
+	willSet(newTotalSteps) {
+    	println("About to set totalSteps to \(newTotalSteps)")
+	}
+	didSet {
+    	if totalSteps > oldValue {
+        	println("Added \(totalSteps - oldValue) steps")
+    	}
+	}
+}
+let stepCounter = StepCounter()
+stepCounter.totalSteps = 200
+// About to set totalSteps to 200
+// Added 200 steps
+stepCounter.totalSteps = 360
+// About to set totalSteps to 360
+// Added 160 steps
+stepCounter.totalSteps = 896
+// About to set totalSteps to 896
+// Added 536 steps
 
 //类中的方法可以在方法定义内部指定参数的名字（第一个参数除外）
 class Counter {
