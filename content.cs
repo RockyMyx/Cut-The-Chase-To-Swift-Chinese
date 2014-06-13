@@ -561,7 +561,7 @@ class Square: Shape {
 
 //属性包括：
 //1、Stored Property：保存实例的变量或常量值（定义在class和struct中）
-struct Fi xedLengthRange {
+struct FixedLengthRange {
     var firstValue: Int
     let length: Int
 }
@@ -867,6 +867,36 @@ struct TimesTable {
 }
 let threeTimesTabl e = TimesTable(multiplier: 3)
 println("six times three is \(threeTimesTable[6])")
+//subscript可以使用变量或者可变参数，但是不能使用inout参数或者有默认值的参数
+//subscript可以重载，可以定义多个参数
+struct Matrix {
+    let rows: Int,  columns: Int
+    var grid: Double[]
+    init(rows: Int, columns: Int) {
+        self. rows = rows
+        self. columns = columns
+        grid = Array(count: rows * columns,  repeatedValue: 0.0)
+    }
+    func indexIsValidForRow (row: Int, column: Int) -> Bool  {
+		return row >= 0 && row < rows && column >= 0 && column < columns
+	}
+	subscript(row: Int, column: Int) -> Doubl e {
+		get {
+			assert(indexIsValidForRow(row, column: column), "Index out of range")
+			return grid[(row * columns) + column]
+		}
+		set {
+			assert(indexIsValidForRow(row , column: column), "Index out of range")
+			grid[(row * columns) + column] = newValue
+		}
+	}
+}
+Matrix matrix = Matrix(2, 2)
+//grid = [0.0, 0.0, 0.0 ,0.0]
+matrix(0, 1) = 1.5
+matrix(1, 0) = 3.2
+/*matrix = [ 0.0, 1.5
+             3.2, 0.0 ] */
 
 struct SimpleStructure: ExampleProtocol {
     var simpleDescription: String = "A simple structure"
