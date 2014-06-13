@@ -536,6 +536,7 @@ shape.simpleDescription();
 
 //类中使用deinit()：在对象回收之前的一些清理工作
 //类继承及方法重写与C#语法一致，初始化使用init，使用self代表当前类
+//如果不写self，则Swift会认为在方法中使用的属性或方法均在当前类中，当方法中的参数名和类中的变量重名时，则必须写self加以区分
 class Square: Shape {
 	var sideLength: Double;
 	init(sideLength: Double, name: String){
@@ -787,11 +788,7 @@ struct Resolution {
 }
 var vga = Resolution(width: 640, height: 480)
 
-//接口定义
-//mutating keyword in the declaration of Simpl eStructure to mark a
-//method that modifies the structure. The declaration of SimpleClass doesn’t need
-//any of its methods marked as mutating because methods on a class can always
-//modify the class.
+//默认情况下，值类型中的属性不能被方法修改，但是可以在方法前使用mutating关键字表示方法可以对值类型进行修改，并且把修改返回原始类型
 protocol ExampleProtocol {
 	var simpleDescription: String {get;}
 	mutating func adjust()
@@ -799,6 +796,7 @@ protocol ExampleProtocol {
 class SimpleClass: ExampleProtocol {
     var simpleDescription: String = "A very simple class."
     var anotherProperty: Int = 69105
+    //类中的方法一定能修改变量值，所以不用mutating标识
     func adjust() {
         simpleDescription += "  Now 100% adjusted."
     }
@@ -806,6 +804,69 @@ class SimpleClass: ExampleProtocol {
 var a = SimpleClass()
 a.adjust()
 let aDescription = a.simpleDescription
+
+struct Point {
+    var x = 0. 0,  y = 0. 0
+    mutating func moveByX(deltaX: Double,  y deltaY : Double) {
+        x += deltaX
+        y += deltaY
+    }
+}
+var somePoint = Point(x: 1. 0,  y: 1. 0)
+somePoint.moveByX(2. 0,  y: 3. 0)
+println("The point is now at  (\(somePoint.x),  \(somePoint.y))")
+//"The point is now at (3.0, 4.0)"
+let fixedPoint = Point(x: 3.0,  y: 3.0)
+2 fixedPoint.moveByX(2.0,  y: 3.0) //error：不可以在常量上使用mutating方法
+
+//mutating方法可以将类的实例赋值为self
+struct Point {
+	var x = 0.0, y = 0.0
+	mutating func moveByX(deltaX: Double, y deltaY: Double) {
+		self = Point(x: x + deltaX, y: y + deltaY)
+	}
+}
+//对于枚举的mutating方法，可以将self赋值为同一枚举中的不同成员
+enum TriStateSwitch {
+	case Off, Low, High
+	mutating func next() {
+	    switch self {
+	    case Off:
+	        self = Low
+	    case Low :
+	        self = High
+	    case High:
+			self = Off
+	}
+}
+var ovenLight = TriStateSwitch.Low
+ovenLight.next()
+// ovenLight is now equal to .High
+ovenLight.next()
+// ovenLight is now equal to .Off
+
+//创建类型方法（Type Methods）：在类中使用class关键字，在值类型中使用static关键字
+//Objective-C中只可以为类定义Type Methods
+
+//可以在类中定义索引，从而通过[index]语法访问相应元素
+subscipt(index: Int) -> Int {
+	get {
+
+	}
+	//newValue可以省略不写
+	set(newValue) {
+
+	}
+}
+//索引访问也可以定义为只读的：
+struct TimesTable {
+    let multiplier: Int
+    subscript(index: Int) -> Int {
+        return multiplier * index
+    }
+}
+let threeTimesTabl e = TimesTable(multiplier: 3)
+println("six times three is \(threeTimesTable[6])")
 
 struct SimpleStructure: ExampleProtocol {
     var simpleDescription: String = "A simple structure"
