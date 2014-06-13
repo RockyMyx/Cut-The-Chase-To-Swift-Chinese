@@ -648,20 +648,6 @@ class EquilateralTriangle : Shape {
 	}
 }
 
-//子类在重写父类的属性时，父类中的属性对子类是不可见的，因此重写时必须同时声明属性的名字和类型，这样编译器才会去检查在父类中是否有同名同类型的属性可以重写
-//重写属性时可以把一个可读写的属性重写为只读的，但是不可以把只读的重写为可读写的
-class SpeedLimitedCar: Car {
-	override var speed: Double  {
-		get {
-		    return super. speed
-		}
-		set {
-		    super.speed = min(new Value, 40.0)
-		}
-	}
-}
-
-
 //Property observers：检测并响应属性值的变化，每次设置属性值时都会调用，即使值没有改变。还可以在子类中重写
 //willSet：传递的是一个新的constant属性值，可以指定自定义的参数名字，如果省略的话可以在实现中使用newValue代替
 //didSet：在值更新后调用，在使用值将传递一个旧的constant属性值，不可以指定自定义的参数名字，实现中使用oldValue代替原始值
@@ -692,6 +678,63 @@ var large = TriangleAndSquare(size: 50, name: "small");
 println(small.triangle.sideLength);
 println(small.square.sideLength);
 
+//子类在重写父类的属性时，父类中的属性对子类是不可见的，因此重写时必须同时声明属性的名字和类型，这样编译器才会去检查在父类中是否有同名同类型的属性可以重写
+//重写属性时可以把一个可读写的属性重写为只读的，但是不可以把只读的重写为可读写的
+class SpeedLimitedCar: Car {
+	override var speed: Double  {
+		get {
+		    return super. speed
+		}
+		set {
+		    super.speed = min(new Value, 40.0)
+		}
+	}
+}
+
+//可以在重写属性增加Observers，这样可以在继承的属性值在修改时使父类得到通知（针对只读的属性不可用）
+//不可以同时在重写时使用setter和Observers
+class Vehicle {
+	var numberOfWheels: Int
+	var maxPassengers: Int
+	func description() -> String {
+	    return "\(numberOfWheel s) wheels; up to \(maxPassengers) passengers"
+	}
+	init() {
+	    numberOfWheels = 0
+	    maxPassengers = 1
+	}
+}
+
+class Car: Vehicle {
+	var speed: Doubl e = 0. 0
+	init() {
+	    super.init()
+	    maxPassengers = 5
+	    numberOfWheels = 4
+	}
+	override func description() -> String {
+	    return super.description() + "; " + "traveling at \(speed) mph"
+}
+
+class AutomaticCar: Car {
+	var gear = 1
+	override var speed: Doubl e {
+		didSet {
+		    gear = Int(speed / 10. 0) + 1
+		}
+	}
+	override func description() -> String {
+	    return super.description() + " in gear \(gear)"
+	}
+}
+
+let automatic = AutomaticCar()
+automatic.speed = 35.0
+printl("AutomaticCar: \(automatic.description())")
+// AutomaticCar: 4 wheels; up to 5 passengers; traveling at 35.0 mph in gear 4
+
+//如果不想让一个方法、属性或者索引被重写，可以在声明时使用@final标识
+//如@final class, @final var, @final func, @final class func, @final subscript
 
 class StepCounter {
 var totalSteps: Int = 0 {
