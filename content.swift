@@ -648,6 +648,20 @@ class EquilateralTriangle : Shape {
 	}
 }
 
+//子类在重写父类的属性时，父类中的属性对子类是不可见的，因此重写时必须同时声明属性的名字和类型，这样编译器才会去检查在父类中是否有同名同类型的属性可以重写
+//重写属性时可以把一个可读写的属性重写为只读的，但是不可以把只读的重写为可读写的
+class SpeedLimitedCar: Car {
+	override var speed: Double  {
+		get {
+		    return super. speed
+		}
+		set {
+		    super.speed = min(new Value, 40.0)
+		}
+	}
+}
+
+
 //Property observers：检测并响应属性值的变化，每次设置属性值时都会调用，即使值没有改变。还可以在子类中重写
 //willSet：传递的是一个新的constant属性值，可以指定自定义的参数名字，如果省略的话可以在实现中使用newValue代替
 //didSet：在值更新后调用，在使用值将传递一个旧的constant属性值，不可以指定自定义的参数名字，实现中使用oldValue代替原始值
