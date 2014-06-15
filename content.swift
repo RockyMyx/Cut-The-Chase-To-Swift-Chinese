@@ -132,7 +132,6 @@ gameLoop: while square ! = finalSquare {
 	}
 }
 
-
 //使用可空操作符?时，如果?前面的值不为nil，则继续执行?后面的操作，如果为nil，则跳过?后面的操作不执行，避免crash
 let optionalSquare = Square?=Square(sideLength:2.5, name: "test")
 let sideLength = optionalSquare?.sideLength;
