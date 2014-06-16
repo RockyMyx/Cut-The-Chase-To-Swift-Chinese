@@ -132,6 +132,7 @@ gameLoop: while square ! = finalSquare {
 	}
 }
 
+
 //使用可空操作符?时，如果?前面的值不为nil，则继续执行?后面的操作，如果为nil，则跳过?后面的操作不执行，避免crash
 let optionalSquare = Square?=Square(sideLength:2.5, name: "test")
 let sideLength = optionalSquare?.sideLength;
@@ -535,6 +536,9 @@ shape.simpleDescription();
 
 //类中使用deinit()：在对象回收之前的一些清理工作
 //类继承及方法重写与C#语法一致，初始化使用init，使用self代表当前类
+//类和结构体在实例创建时，必须为所有存储型属性设置合适的初始值（通过构造函数或者直接赋值），属性值不能处于一个未知的状态。如果是可空类型则默认赋值为nil
+//构造函数主要会自动为参数生成同名的外部名称，便于调用，所以param参数实际相当于#param
+//如果不想构造函数自动创建参数名，可以使用_表示参数名，以此覆盖默认的行为。
 //如果不写self，则Swift会认为在方法中使用的属性或方法均在当前类中，当方法中的参数名和类中的变量重名时，则必须写self加以区分
 class Square: Shape {
 	var sideLength: Double;
