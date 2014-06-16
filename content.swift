@@ -536,7 +536,16 @@ shape.simpleDescription();
 
 //类中使用deinit()：在对象回收之前的一些清理工作
 //类继承及方法重写与C#语法一致，初始化使用init，使用self代表当前类
-//类和结构体在实例创建时，必须为所有存储型属性设置合适的初始值（通过构造函数或者直接赋值），属性值不能处于一个未知的状态。如果是可空类型则默认赋值为nil
+//Swift 为所有已提供属性默认值且没有定义任何构造器的结构体或基类提供一个默认的构造器。这个默认构造器将创建一个所有属性值都为默认值的实例。如果定义了其他的构造器，则不可以再访问默认的构造器
+//类和结构体在实例创建时，必须为所有存储型属性设置合适的初始值（通过构造函数或者直接赋值），属性值不能处于一个未知的状态。如果是可空类型则默认赋值为nil，如果是常量，也仍然可以在构造函数中设置值
+class ShoppingListItem {
+    var name: String?
+    var quantity = 1
+    var purchased = false
+}
+var item = ShoppingListItem()
+//由于ShoppingListItem类中的所有属性都有默认值，且它是没有父类的基类，所以有一个可以为所有属性设置默认值的默认构造器
+
 //构造函数主要会自动为参数生成同名的外部名称，便于调用，所以param参数实际相当于#param
 //如果不想构造函数自动创建参数名，可以使用_表示参数名，以此覆盖默认的行为。
 //如果不写self，则Swift会认为在方法中使用的属性或方法均在当前类中，当方法中的参数名和类中的变量重名时，则必须写self加以区分
@@ -561,6 +570,36 @@ class Square: Shape {
 		}
 	}
 }
+
+//跟 Objective-C 中的子类不同，Swift 中的子类不会默认继承父类的构造器。
+//Swift的这种机制可以防止一个父类的简单构造器被一个专门的子类继承，并被错误的用来创建子类的实例。
+
+//Designated initializers：
+init(parameters) {
+    statements
+}
+
+//类中最主要的构造器，将初始化类中提供的所有属性，并根据父类链往上调用父类的构造器来实现父类的初始化。每一个类都必须拥有至少一个Designated initializer。
+//Convenience initializers：可以定义Convenience initializer调用同一个类中的Designated initializer，并为其参数提供默认值。也可以定义Convenience initializer创建一个特殊用途或特定输入的实例。应当只在必要的时候为类提供便利构造器。
+convenience init(parameters) {
+    statements
+}
+
+//Designated initializer必须调用其直接父类的的Designated initializer，即向上代理。
+//Convenience initializer必须调用同一类中定义的其它构造器，且以调用一个指定的Designated initializer结束，即横向代理。
+
+//如果子类没有定义任何Designated initializer，它将自动继承所有父类的Designated initializer。
+//如果子类提供了所有父类Designated initializer的实现，它将自动继承所有父类的Convenience initializer。
+
+class SomeClass {
+    let someProperty: SomeType = {
+        // 在这个闭包中给 someProperty 创建一个默认值
+        // someValue 必须和 SomeType 类型相同
+        return someValue
+    }()
+}
+//包结尾的大括号后面接了一对空的小括号。这是用来告诉 Swift 需要立刻执行此闭包。如果你忽略了这对括号，相当于是将闭包本身作为值赋值给了属性，而不是将闭包的返回值赋值给属性。
+//如果你使用闭包来初始化属性的值，在闭包执行时，实例的其它部分都还没有初始化。这意味着你不能够在闭包里访问其它的属性，就算这个属性有默认值也不允许。同样，你也不能使用隐式的self属性，或者调用其它的实例方法。
 
 //属性包括：
 //1、Stored Property：保存实例的变量或常量值（定义在class和struct中）
