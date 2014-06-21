@@ -534,6 +534,100 @@ var shape = SomeClass();
 //调用实例方法
 shape.simpleDescription();
 
+//弱引用和无主引用允许循环引用中的一个实例引用另外一个实例而不保持强引用。这样实例能够互相引用而不产生循环强引用。
+//对于生命周期中会变为nil的实例使用弱引用。相反的，对于初始化赋值后再也不会被赋值为nil的实例，使用无主引用。
+//声明属性或者变量时，在前面加上weak关键字表明这是一个弱引用。因为弱引用可以没有值，因此必须将每一个弱引用声明为可选类型。
+
+//Person和Apartment的例子展示了两个属性的值都允许为nil，并会潜在的产生循环强引用。这种场景最适合用弱引用来解决。
+class Person {
+    let name: String
+    init(name: String) { self.name = name }
+    var apartment: Apartment?
+    deinit { println("\(name) is being deinitialized") }
+}
+class Apartment {
+    let number: Int
+    init(number: Int) { self.number = number }
+    weak var tenant: Person?
+    deinit { println("Apartment #\(number) is being deinitialized") }
+}
+var john: Person?
+var number73: Apartment?
+
+john = Person(name: "John Appleseed")
+number73 = Apartment(number: 73)
+
+john!.apartment = number73
+number73!.tenant = john
+
+john = nil
+// prints "John Appleseed is being deinitialized"
+number73 = nil
+// prints "Apartment #73 is being deinitialized"
+
+
+//键字unowned表示这是一个无主引用。无主引用不会牢牢保持住引用的实例。和弱引用不同的是，无主引用是永远有值的。ARC 无法在实例被销毁后将无主引用设为nil，因为非可选类型的变量不允许被赋值为nil
+//如果你试图在实例被销毁后，访问该实例的无主引用，会触发运行时错误。使用无主引用，你必须确保引用始终指向一个未销毁的实例。还需要注意的是如果你试图访问实例已经被销毁的无主引用，程序会直接崩溃，而不会发生无法预期的行为。所以你应当避免这样的事情发生。
+
+//Customer和CreditCard的例子展示了一个属性的值允许为nil，而另一个属性的值不允许为nil，并会潜在的产生循环强引用。这种场景最适合通过无主引用来解决。
+class Customer {
+    let name: String
+    var card: CreditCard?
+    init(name: String) {
+        self.name = name
+    }
+    deinit { println("\(name) is being deinitialized") }
+}
+class CreditCard {
+    let number: Int
+    unowned let customer: Customer
+    init(number: Int, customer: Customer) {
+        self.number = number
+        self.customer = customer
+    }
+    deinit { println("Card #\(number) is being deinitialized") }
+}
+
+var john: Customer?
+john = Customer(name: "John Appleseed")
+john!.card = CreditCard(number: 1234_5678_9012_3456, customer: john!)
+
+john = nil
+// prints "John Appleseed is being deinitialized"
+// prints "Card #1234567890123456 is being deinitialized"
+
+
+// 有第三种场景，在这种场景中，两个属性都必须有值，并且初始化完成后不能为nil。在这种场景中，需要一个类使用无主属性，而另外一个类使用隐式解析可选属性。
+//Country和City，每个类将另外一个类的实例保存为属性。在这个模型中，每个国家必须有首都，而每一个城市必须属于一个国家。为了实现这种关系，Country类拥有一个capitalCity属性，而City类有一个country属性：
+class Country {
+    let name: String
+    let capitalCity: City!
+    init(name: String, capitalName: String) {
+        self.name = name
+        self.capitalCity = City(name: capitalName, country: self)
+    }
+}
+class City {
+    let name: String
+    unowned let country: Country
+    init(name: String, country: Country) {
+        self.name = name
+        self.country = country
+    }
+}
+
+//在定义闭包时同时定义捕获列表作为闭包的一部分，通过这种方式可以解决闭包和类实例之间的循环强引用。捕获列表定义了闭包体内捕获一个或者多个引用类型的规则。跟解决两个类实例间的循环强引用一样，声明每个捕获的引用为弱引用或无主引用，而不是强引用。应当根据代码关系来决定使用弱引用还是无主引用。
+//捕获列表中的每个元素都是由weak或者unowned关键字和实例的引用（如self或someInstance）成对组成。每一对都在方括号中，通过逗号分开。
+@lazy var someClosure: (Int, String) -> String = {
+    [unowned self] (index: Int, stringToProcess: String) -> String in
+    // closure body goes here
+}
+//如果闭包没有指定参数列表或者返回类型，则可以通过上下文推断，那么可以捕获列表放在闭包开始的地方，跟着是关键字in：
+@lazy var someClosure: () -> String = {
+    [unowned self] in
+    // closure body goes here
+}
+
 //类的析构函数deinit()：在对象回收之前的一些清理工作，每个类最多只能有一个。析构函数不带任何参数，deinit { // 执行析构过程 }
 //Swift 会自动释放不再需要的实例以释放资源。如自动引用计数那一章描述，Swift 通过自动引用计数（ARC）处理实例的内存管理。通常当你的实例被释放时不需要手动地去清理。但是，当使用自己的资源时，你可能需要进行一些额外的清理。例如，如果创建了一个自定义的类来打开一个文件，并写入一些数据，你可能需要在类实例被释放之前关闭该文件。
 //子类继承了父类的析构函数，则在子类析构函数实现的最后，父类的析构函数被自动调用。即使子类没有提供自己的析构函数，父类的析构函数也总是被调用。
@@ -604,6 +698,7 @@ class SomeClass {
 }
 //包结尾的大括号后面接了一对空的小括号。这是用来告诉 Swift 需要立刻执行此闭包。如果你忽略了这对括号，相当于是将闭包本身作为值赋值给了属性，而不是将闭包的返回值赋值给属性。
 //如果你使用闭包来初始化属性的值，在闭包执行时，实例的其它部分都还没有初始化。这意味着你不能够在闭包里访问其它的属性，就算这个属性有默认值也不允许。同样，你也不能使用隐式的self属性，或者调用其它的实例方法。
+//只要在闭包内使用self的成员，就要用self.someProperty或者self.someMethod（而不只是someProperty或someMethod）。这提醒你可能会不小心就捕获了self。
 
 //属性包括：
 //1、Stored Property：保存实例的变量或常量值（定义在class和struct中）
