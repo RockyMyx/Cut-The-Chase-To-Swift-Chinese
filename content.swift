@@ -1307,5 +1307,168 @@ printLetterKinds("Hello")
 // 'Hello' is made up of the following kinds of letters:
 // consonant vowel consonant consonant vowel
 
+在类型名称后加上协议名称，中间以冒号:分隔即可实现协议；实现多个协议时，各协议之间用逗号,分隔，如下所示:
+struct SomeStructure: FirstProtocol, AnotherProtocol {
+    // 结构体内容
+}
 
+如果一个类在含有父类的同时也采用了协议，应当把父类放在所有的协议之前，如下所示:
+class SomeClass: SomeSuperClass, FirstProtocol, AnotherProtocol {
+    // 类的内容
+}
+如果协议要求属性是可读写的，那么这个属性不能是常量存储型属性或只读计算型属性；如果协议要求属性是只读的(gettable)，那么任意的属性都能满足协议的规定，在你的代码中，即使为只读属性实现了写方法(settable)也依然有效。
+
+通常在协议的定义中使用class前缀表示该属性为类成员；在枚举和结构体实现协议时中，需要使用static关键字作为前缀。
+protocol AnotherProtocol {
+    class var someTypeProperty: Int { get set }
+}
+
+协议中的方法支持变长参数(variadic parameter)，不支持参数默认值(default value)。
+
+用类实现协议中的mutating方法时，不用写mutating关键字;用结构体，枚举实现协议中的mutating方法时，必须写mutating关键字。
+
+protocol Togglable {
+    mutating func toggle()
+}
+enum OnOffSwitch: Togglable {
+    case Off, On
+    mutating func toggle() {
+        switch self {
+        case Off:
+            self = On
+        case On:
+            self = Off
+        }
+    }
+}
+var lightSwitch = OnOffSwitch.Off
+lightSwitch.toggle()
+//lightSwitch 现在的值为 .On
+
+
+通过扩展为已存在的类型遵循协议时，该类型的所有实例也会随之添加协议中的方法
+protocol TextRepresentable {
+    func asText() -> String
+}
+extension Dice: TextRepresentable {
+    func asText() -> String {
+        return "A \(sides)-sided dice"
+    }
+}
+
+当一个类型已经实现了协议中的所有要求，却没有声明时，可以通过扩展来补充协议声明:
+struct Hamster {
+    var name: String
+    func asText() -> String {
+        return "A hamster named \(name)"
+    }
+}
+extension Hamster: TextRepresentable {}
+
+协议类型可以被集合使用，表示集合中的元素均为协议类型:
+let things: TextRepresentable[] = [game,d12,simoTheHamster]
+for thing in things {
+    println(thing.asText())
+}
+
+一个协议可由多个协议采用protocol<SomeProtocol， AnotherProtocol>这样的格式进行组合，称为协议合成(protocol composition)。协议合成并不会生成一个新协议类型，而是将多个协议合成为一个临时的协议，超出范围后立即失效。
+protocol Named {
+    var name: String { get }
+}
+protocol Aged {
+    var age: Int { get }
+}
+struct Person: Named, Aged {
+    var name: String
+    var age: Int
+}
+func wishHappyBirthday(celebrator: protocol<Named, Aged>) {
+    println("Happy birthday \(celebrator.name) - you're \(celebrator.age)!")
+}
+let birthdayPerson = Person(name: "Malcolm", age: 21)
+wishHappyBirthday(birthdayPerson)
+// 输出 "Happy birthday Malcolm - you're 21!
+
+
+@objc protocol HasArea {
+    var area: Double { get }
+}
+@objc用来表示协议是可选的，也可以用来表示暴露给Objective-C的代码，此外，@objc型协议只对类有效，因此只能在类中检查协议的一致性。
+is操作符用来检查实例是否遵循了某个协议。
+as?返回一个可选值，当实例遵循协议时，返回该协议类型;否则返回nil
+as用以强制向下转型。
+在协议中使用@optional关键字作为前缀来定义可选成员。
+@objc protocol CounterDataSource {
+    @optional func incrementForCount(count: Int) -> Int
+    @optional var fixedIncrement: Int { get }
+}
+
+内置函数swap
+
+func swapTwoValues<T>(inout a: T, inout b: T) {
+    let temporaryA = a
+    a = b
+    b = temporaryA
+}
+始终使用大写字母开头的驼峰式命名法（例如T和KeyType）来给类型参数命名，以表明它们是类型的占位符，而非类型值。
+
+你可以写一个在一个类型参数名后面的类型约束，通过冒号分割，来作为类型参数链的一部分。这种作用于泛型函数的类型约束的基础语法如下所示（和泛型类型的语法相同）：
+func someFunction<T: SomeClass, U: SomeProtocol>(someT: T, someU: U) {
+    // function body goes here
+}
+
+Swift 的Dictionary类型对作用于其键的类型做了些限制。在字典的描述中，字典的键类型必须是可哈希，也就是说，必须有一种方法可以使其被唯一的表示。Dictionary之所以需要其键是可哈希是为了以便于其检查其是否已经包含某个特定键的值。这个需求强制加上一个类型约束作用于Dictionary的键上，当然其键类型必须遵循Hashable协议（Swift 标准库中定义的一个特定协议）。所有的 Swift 基本类型（如String，Int， Double和 Bool）默认都是可哈希。
+
+不是所有的 Swift 中的类型都可以用等式符（==）进行比较。例如，如果你创建一个你自己的类或结构体来表示一个复杂的数据模型，那么 Swift 没法猜到对于这个类或结构体而言“等于”的意思。正因如此，这部分代码不能可能保证工作于每个可能的类型T，当你试图编译这部分代码时估计会出现相应的错误。
+不过，Swift 标准库中定义了一个Equatable协议，该协议要求任何遵循的类型实现等式符（==）和不等符（!=）对任何两个该类型进行比较。所有的 Swift基本类型自动支持Equatable协议。代码修改为如下形式即可编译通过。
+func findIndex<T: Equatable>(array: T[], valueToFind: T) -> Int? {
+    for (index, value) in enumerate(array) {
+        if value == valueToFind {
+            return index
+        }
+    }
+    return nil
+}
+当定义一个协议时，有的时候声明一个或多个关联类型作为协议定义的一部分是非常有用的。一个关联类型作为协议的一部分，给定了类型的一个占位名（或别名）。作用于关联类型上实际类型在协议被实现前是不需要指定的。关联类型被指定为`typealias`关键字。
+
+protocol Container {
+    typealias ItemType
+    mutating func append(item: ItemType)
+    var count: Int { get }
+    subscript(i: Int) -> ItemType { get }
+}
+struct IntStack: Container {
+    typealias ItemType = Int
+    mutating func append(item: Int) {
+        self.push(item)
+    }
+    var count: Int {
+    return items.count
+    }
+    subscript(i: Int) -> Int {
+        return items[i]
+    }
+}
+
+可以在参数列表中通过*where*语句定义参数的约束。一个`where`语句能够使一个关联类型遵循一个特定的协议，以及（或）那个特定的类型参数和关联类型可以是相同的。你可以写一个`where`语句，紧跟在在类型参数列表后面，where语句后跟一个或者多个针对关联类型的约束，以及（或）一个或多个类型和关联类型间的等价(equality)关系。
+
+func allItemsMatch<C1: Container, C2: Container
+                 where C1.ItemType == C2.ItemType, C1.ItemType: Equatable>
+    (someContainer: C1, anotherContainer: C2) -> Bool {
+
+        // 检查两个Container的元素个数是否相同
+        if someContainer.count != anotherContainer.count {
+            return false
+        }
+
+        // 检查两个Container相应位置的元素彼此是否相等
+        for i in 0..someContainer.count {
+            if someContainer[i] != anotherContainer[i] {
+                return false
+            }
+        }
+
+        // 如果所有元素检查都相同则返回true
+        return true
+}
 
