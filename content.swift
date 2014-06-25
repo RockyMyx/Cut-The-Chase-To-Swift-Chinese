@@ -388,6 +388,22 @@ hasAnyMatches([1,5,8,10,34,11,62,4], lessThanTen);
 //闭包可以省略 它的参数的type 和返回值的type. 如果省略了参数和参数类型，就也要省略 'in'关键字。 如果被省略的type 无法被编译器获知（inferred） ，那么就会抛出编译错误。
 //闭包可以省略参数，转而在方法体（statement）中使用 $0, $1, $2 来引用出现的第一个，第二个，第三个参数。
 //如果闭包中只包含了一个表达式，那么该表达式就会自动成为该闭包的返回值。 在执行 'type inference '时，该表达式也会返回。
+//下面几个闭包是等价的
+myFunction {
+    （x: Int, y: Int） -> Int in
+    return x + y
+}
+
+myFunction {
+    （x, y） in
+    return x + y
+}
+
+myFunction { return $0 + $1 }
+
+myFunction { $0 + $1 }
+
+-----------------------------------
 
 numbers.map({
 	(number: Int) -> Int in
@@ -441,6 +457,11 @@ let strings = numbers.map {
 	}
 	return output
 }
+
+//在闭包的参数列表（ capture list）中， 参数可以声明为 'weak' 或者 'unowned' .
+myFunction { print（self.title） }                    // strong capture
+myFunction { [weak self] in print（self!.title） }    // weak capture
+myFunction { [unowned self] in print（self.title） }  // unowned capture
 
 //函数如果没有返回值可以不写，但实际上Swift内部会处理函数返回值为Void，这是一个没有元素的元组，即()
 
@@ -537,6 +558,9 @@ var shape = SomeClass();
 //调用实例方法
 shape.simpleDescription();
 
+//跟函数（function）不同， initializer 不能返回值。
+var xx = SomeClass.init              // error
+
 //弱引用和无主引用允许循环引用中的一个实例引用另外一个实例而不保持强引用。这样实例能够互相引用而不产生循环强引用。
 //对于生命周期中会变为nil的实例使用弱引用。相反的，对于初始化赋值后再也不会被赋值为nil的实例，使用无主引用。
 //声明属性或者变量时，在前面加上weak关键字表明这是一个弱引用。因为弱引用可以没有值，因此必须将每一个弱引用声明为可选类型。
@@ -567,6 +591,10 @@ john = nil
 // prints "John Appleseed is being deinitialized"
 number73 = nil
 // prints "Apartment #73 is being deinitialized"
+
+//self用作后缀表达式：
+形式1 表示会返回 expression 的值。例如： x.self 返回 x
+形式2：返回对应的type。我们可以用它来动态的获取某个instance的type。
 
 
 //键字unowned表示这是一个无主引用。无主引用不会牢牢保持住引用的实例。和弱引用不同的是，无主引用是永远有值的。ARC 无法在实例被销毁后将无主引用设为nil，因为非可选类型的变量不允许被赋值为nil
@@ -916,6 +944,7 @@ counter.incrementBy(2, numberofTimes: 7)
 enum Card: Int {
 	//Swift中的枚举值不会默认为0,1,2...，而是需要手动设置
 	//Ace = 1表示枚举的初始值（Raw Value），当初始值为Int时，后面的枚举值会递增赋值
+	//.Ace等称为隐式的属性值访问
 	//可以使用Card.Ace.toRaw()访问初始值
 	//通过Card.fromRaw(7)找到枚举中对应值的项，返回值为Optional Value
 	case Ace = 1
@@ -1594,3 +1623,34 @@ let firstVector = Vector2D(x: 1.0, y: 2.0)
 let secondVector = Vector2D(x: 3.0, y: 4.0)
 let plusMinusVector = firstVector +- secondVector
 // plusMinusVector 此时的值为 (4.0, -2.0)
+
+运算符两侧的空白被用来区分该运算符是否为前缀运算符（prefix operator）、后缀运算符（postfix operator）或二元运算符（binary operator）。规则总结如下：
+
+·如果运算符两侧都有空白或两侧都无空白，将被看作二元运算符。例如：a+b 和 a + b 中的运算符 + 被看作二元运算符。
+·如果运算符只有左侧空白，将被看作前缀一元运算符。例如 a ++b 中的 ++ 被看作前缀一元运算符。
+·如果运算符只有右侧空白，将被看作后缀一元运算符。例如 a++ b 中的 ++ 被看作后缀一元运算符。
+·如果运算符左侧没有空白并紧跟 .，将被看作后缀一元运算符。例如 a++.b 中的 ++ 被看作后缀一元运算符（同理， a++ . b 中的 ++ 是后缀一元运算符而 a ++ .b 中的 ++ 不是）.
+
+如果运算符 ! 或 ? 左侧没有空白，则不管右侧是否有空白都将被看作后缀运算符。如果将 ? 用作可选类型（optional type）修饰，左侧必须无空白。如果用于条件运算符 ? :，必须两侧都有空白。
+
+用作声明的关键字： class、deinit、enum、extension、func、import、init、let、protocol、static、struct、subscript、typealias、var
+用作语句的关键字： break、case、continue、default、do、else、fallthrough、if、in、for、return、switch、where、while
+
+dynamic表达式
+
+class SomeBaseClass {
+    class func printClassName（） {
+        println（"SomeBaseClass"）
+    }
+}
+class SomeSubClass: SomeBaseClass {
+    override class func printClassName（） {
+        println（"SomeSubClass"）
+    }
+}
+let someInstance: SomeBaseClass = SomeSubClass（）
+
+// someInstance is of type SomeBaseClass at compile time, but
+// someInstance is of type SomeSubClass at runtime
+someInstance.dynamicType.printClassName（）
+// prints "SomeSubClass"
