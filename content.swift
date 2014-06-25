@@ -385,6 +385,9 @@ hasAnyMatches([1,5,8,10,34,11,62,4], lessThanTen);
 
 //闭包表达式格式，使用in分隔函数定义和实现：{(parameters) -> return type in statements }
 //闭包表达式中支持变量和常量参数，支持inout参数，支持可变类型参数（需在最后），支持元组参数和返回类型，不支持默认值参数
+//闭包可以省略 它的参数的type 和返回值的type. 如果省略了参数和参数类型，就也要省略 'in'关键字。 如果被省略的type 无法被编译器获知（inferred） ，那么就会抛出编译错误。
+//闭包可以省略参数，转而在方法体（statement）中使用 $0, $1, $2 来引用出现的第一个，第二个，第三个参数。
+//如果闭包中只包含了一个表达式，那么该表达式就会自动成为该闭包的返回值。 在执行 'type inference '时，该表达式也会返回。
 
 numbers.map({
 	(number: Int) -> Int in
@@ -1472,3 +1475,122 @@ func allItemsMatch<C1: Container, C2: Container
         return true
 }
 
+不同于C语言中的数值计算，Swift的数值计算默认是不可溢出的。溢出行为会被捕获并报告为错误。但Swift还有一套默认允许溢出的数值运算符，如可溢出的加号为`&+`。所有允许溢出的运算符都是以`&`开始的。
+
+var willOverflow = UInt8.max
+// willOverflow 等于UInt8的最大整数 255
+willOverflow = willOverflow &+ 1
+// 此时 willOverflow 等于 0
+
+var willUnderflow = UInt8.min
+// willUnderflow 等于UInt8的最小值0
+willUnderflow = willUnderflow &- 1
+// 此时 willUnderflow 等于 255
+
+有符整型所有的减法也都是对包括在符号位在内的二进制数进行二进制减法的
+var signedUnderflow = Int8.min
+// signedUnderflow 等于最小的有符整数 -128，即10000000
+signedUnderflow = signedUnderflow &- 1
+// 此时 signedUnderflow 等于 127，即01111111
+
+let x = 1
+let y = x &/ 0
+// y 等于 0
+
+可以使用移位操作进行其他数据类型的编码和解码。
+let pink: UInt32 = 0xCC6699
+let redComponent = (pink & 0xFF0000) >> 16    // redComponent 是 0xCC, 即 204
+let greenComponent = (pink & 0x00FF00) >> 8   // greenComponent 是 0x66, 即 102
+let blueComponent = pink & 0x0000FF           // blueComponent 是 0x99, 即 153
+
+这个例子使用了一个`UInt32`的命名为`pink`的常量来存储层叠样式表`CSS`中粉色的颜色值，`CSS`颜色`#CC6699`在Swift用十六进制`0xCC6699`来表示。然后使用按位与(&)和按位右移就可以从这个颜色值中解析出红(CC)，绿(66)，蓝(99)三个部分。
+
+对`0xCC6699`和`0xFF0000`进行按位与`&`操作就可以得到红色部分。`0xFF0000`中的`0`了遮盖了`OxCC6699`的第二和第三个字节，这样`6699`被忽略了，只留下`0xCC0000`。
+
+然后，按向右移动16位，即 `>> 16`。十六进制中每两个字符是8比特位，所以移动16位的结果是把`0xCC0000`变成`0x0000CC`。这和`0xCC`是相等的，就是十进制的`204`。
+
+同样的，绿色部分来自于`0xCC6699`和`0x00FF00`的按位操作得到`0x006600`。然后向右移动8位，得到`0x66`，即十进制的`102`。
+
+最后，蓝色部分对`0xCC6699`和`0x0000FF`进行按位与运算，得到`0x000099`，无需向右移位了，所以结果就是`0x99`，即十进制的`153`。
+
+按位左移和按位右移的效果相当把一个整数乘于或除于一个因子为`2`的整数。向左移动一个整型的比特位相当于把这个数乘于`2`，向右移一位就是除于`2`。
+
+有符整型的移位操作
+
+正数符号位为`0`，代表正数，如4为00000100。
+负数跟正数不同。负数存储的是2的n次方减去它的绝对值，n为数值位的位数。一个8比特的数有7个数值位，所以是2的7次方，即128，所以-4为11111100，即124。
+
+负数的编码方式称为二进制补码表示。这种表示方式看起来很奇怪，但它有几个优点。
+
+首先，只需要对全部8个比特位(包括符号)做标准的二进制加法就可以完成 `-1 + -4` 的操作，忽略加法过程产生的超过8个比特位表达的任何信息。
+
+第二，由于使用二进制补码表示，我们可以和正数一样对负数进行按位左移右移的，同样也是左移1位时乘于`2`，右移1位时除于`2`。要达到此目的，对有符整型的右移有一个特别的要求：对有符整型按位右移时，使用符号位(正数为`0`，负数为`1`)填充空白位。
+
+运算符重载：
+struct Vector2D {
+    var x = 0.0, y = 0.0
+}
+@infix func + (left: Vector2D, right: Vector2D) -> Vector2D {
+    return Vector2D(x: left.x + right.x, y: left.y + right.y)
+}
+
+@infix表明是中置运算符，即出现在运算的中间，以下是前置运算符重载的定义，后置使用@postfix
+
+@prefix func - (vector: Vector2D) -> Vector2D {
+    return Vector2D(x: -vector.x, y: -vector.y)
+}
+
+let positive = Vector2D(x: 3.0, y: 4.0)
+let negative = -positive
+// negative 为 (-3.0, -4.0)
+
+组合赋值符号需要使用`@assignment`属性，还需要把运算符的左参数设置成`inout`，因为这个参数会在运算符函数内直接修改它的值。
+
+@assignment func += (inout left: Vector2D, right: Vector2D) {
+    left = left + right
+}
+
+var original = Vector2D(x: 1.0, y: 2.0)
+let vectorToAdd = Vector2D(x: 3.0, y: 4.0)
+original += vectorToAdd
+// original 现在为 (4.0, 6.0)
+
+可以将 `@assignment` 属性和 `@prefix` 或 `@postfix` 属性起来组合，实现一个`Vector2D`的前置运算符。
+
+@prefix @assignment func ++ (inout vector: Vector2D) -> Vector2D {
+    vector += Vector2D(x: 1.0, y: 1.0)
+    return vector
+}
+
+var toIncrement = Vector2D(x: 3.0, y: 4.0)
+let afterIncrement = ++toIncrement
+// toIncrement 现在是 (4.0, 5.0)
+// afterIncrement 现在也是 (4.0, 5.0)
+
+=, ->、//、/*、*/、. 以及一元前缀运算符 & 属于保留字，这些标记不能被重写或用于自定义运算符。三目条件运算符 `a？b：c` 也是不可重载。
+
+新的运算符声明需在全局域使用`operator`关键字声明，可以声明为前置，中置或后置的。
+
+@prefix @assignment func +++ (inout vector: Vector2D) -> Vector2D {
+    vector += vector
+    return vector
+}
+
+var toBeDoubled = Vector2D(x: 1.0, y: 4.0)
+let afterDoubling = +++toBeDoubled
+// toBeDoubled 现在是 (2.0, 8.0)
+// afterDoubling 现在也是 (2.0, 8.0)
+
+
+可以为自定义的中置运算符指定优先级和结合性。结合性(associativity)的值可取的值有`left`，`right`和`none`。左结合运算符跟其他优先级相同的左结合运算符写在一起时，会跟左边的操作数结合。同理，右结合运算符会跟右边的操作数结合。而非结合运算符不能跟其他相同优先级的运算符写在一起。结合性(associativity)的值默认为`none`，优先级(precedence)默认为`100`。
+
+以下例子定义了一个新的中置符`+-`，是左结合的`left`，优先级为`140`。
+
+operator infix +- { associativity left precedence 140 }
+func +- (left: Vector2D, right: Vector2D) -> Vector2D {
+    return Vector2D(x: left.x + right.x, y: left.y - right.y)
+}
+let firstVector = Vector2D(x: 1.0, y: 2.0)
+let secondVector = Vector2D(x: 3.0, y: 4.0)
+let plusMinusVector = firstVector +- secondVector
+// plusMinusVector 此时的值为 (4.0, -2.0)
