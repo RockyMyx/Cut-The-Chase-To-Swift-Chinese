@@ -1,0 +1,30 @@
+类可以继承单个超类，适配任意数量的协议。当定义一个类时，超类的名字必须出现在类型标识符列表首位，然后跟上该类需要适配的任意数量的协议。如果一个类不是从其它类继承而来，那么列表可以以协议开头。
+protocol ITestProtocol {
+	
+}
+class SuperClass {
+	
+}
+class SubClass : ITestProtocol, SuperClass {
+	
+}
+
+
+let e = 2.71828 // The type of e is inferred to be Double.
+let eFloat: Float = 2.71828 // The type of eFloat is Float.
+println(e==eFloat);
+
+Initializer表达式用来给某个Type初始化。 它的形式如下：
+
+expression.init（initializer arguments）
+（Initializer表达式用来给某个Type初始化。） 跟函数（function）不同， initializer 不能返回值。
+
+var x = SomeClass.someClassFunction // ok
+var y = SomeClass.init              // error
+
+
+类的指定构造器将类的所有属性直接初始化。如果类有超类，它不能调用该类的其他构造器,它只能调用超类的一个
+指定构造器。
+
+类型后紧跟?（不可有空格符）表示可为nil，即空值
+var optionalName: String ?="John";
