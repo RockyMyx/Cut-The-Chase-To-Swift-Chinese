@@ -95,131 +95,6 @@ class City {
     // closure body goes here
 }
 
-//类的析构函数deinit()：在对象回收之前的一些清理工作，每个类最多只能有一个。析构函数不带任何参数，deinit { // 执行析构过程 }
-//Swift 会自动释放不再需要的实例以释放资源。如自动引用计数那一章描述，Swift 通过自动引用计数（ARC）处理实例的内存管理。通常当你的实例被释放时不需要手动地去清理。但是，当使用自己的资源时，你可能需要进行一些额外的清理。例如，如果创建了一个自定义的类来打开一个文件，并写入一些数据，你可能需要在类实例被释放之前关闭该文件。
-//子类继承了父类的析构函数，则在子类析构函数实现的最后，父类的析构函数被自动调用。即使子类没有提供自己的析构函数，父类的析构函数也总是被调用。
-//因为直到实例的析构函数被调用时，实例才会被释放，所以析构函数可以访问所有请求实例的属性，并且根据那些属性可以修改它的行为
-
-//类继承及方法重写与C#语法一致，初始化使用init，使用self代表当前类
-//Swift 为所有已提供属性默认值且没有定义任何构造器的结构体或基类提供一个默认的构造器。这个默认构造器将创建一个所有属性值都为默认值的实例。如果定义了其他的构造器，则不可以再访问默认的构造器
-//类和结构体在实例创建时，必须为所有存储型属性设置合适的初始值（通过构造函数或者直接赋值），属性值不能处于一个未知的状态。如果是可空类型则默认赋值为nil，如果是常量，也仍然可以在构造函数中设置值
-class ShoppingListItem {
-    var name: String?
-    var quantity = 1
-    var purchased = false
-}
-var item = ShoppingListItem()
-//由于ShoppingListItem类中的所有属性都有默认值，且它是没有父类的基类，所以有一个可以为所有属性设置默认值的默认构造器
-
-//构造函数主要会自动为参数生成同名的外部名称，便于调用，所以param参数实际相当于#param
-//如果不想构造函数自动创建参数名，可以使用_表示参数名，以此覆盖默认的行为。
-//如果不写self，则Swift会认为在方法中使用的属性或方法均在当前类中，当方法中的参数名和类中的变量重名时，则必须写self加以区分
-class Square: Shape {
-	var sideLength: Double;
-	init(sideLength: Double, name: String){
-		self.sideLength = sideLength;
-		super.init(name: name);
-		numberOfSides = 4;
-	}
-
-	override simpleDescription() -> String {
-		return "Square simpleDescription"
-	}
-
-	var perimeter: Double {
-		get {
-			return 4.0 * sideLength
-		}
-		set {
-			sideLength = newValue / 4.0
-		}
-	}
-}
-
-
-class EquilateralTriangle : Shape {
-	var sideLength: Double;
-	init(sideLength: Double, name: String){
-		self.sideLength = sideLength;
-		super.init(name: name);
-		numberOfSides = 3;
-	}
-
-	var perimeter: Double{
-		get {
-			return 3.0 * sideLength
-		}
-		set {
-			sideLength = newValue / 3.0
-		}
-	}
-}
-
-
-//在Swift中，class和struct非常类似：
-//1、都可以定义属性
-//2、都可以定义函数
-//3、都可以定义索引访问值
-//4、都可以在默认实现上进行功能扩展
-//5、都可以实现protocol
-//6、构建实例对象都使用"名字()"的形式，访问属性方法都使用.语法
-
-//class中独有的特性：
-//1、类可以继承
-//2、类可以在运行时进行类型转换
-//3、可以使用deinit方法释放类的示例以及关联的相关资源
-//4、类是引用类型，可以指定多个类的实例
-
-//struct中独有的特性：
-//1、struct默认拥有由成员组成的构造器
-struct Resolution {
-    var width = 0
-    var height = 0
-}
-var vga = Resolution(width: 640, height: 480)
-
-//默认情况下，值类型中的属性不能被方法修改，但是可以在方法前使用mutating关键字表示方法可以对值类型进行修改，并且把修改返回原始类型
-以self修饰的枚举或结构体方法必须以mutating关键字作为函数声明头。
-protocol ExampleProtocol {
-	var simpleDescription: String {get;}
-	mutating func adjust()
-}
-class SimpleClass: ExampleProtocol {
-    var simpleDescription: String = "A very simple class."
-    var anotherProperty: Int = 69105
-    //类中的方法一定能修改变量值，所以不用mutating标识
-    func adjust() {
-        simpleDescription += "  Now 100% adjusted."
-    }
-}
-var a = SimpleClass()
-a.adjust()
-let aDescription = a.simpleDescription
-
-struct Point {
-    var x = 0. 0,  y = 0. 0
-    mutating func moveByX(deltaX: Double,  y deltaY : Double) {
-        x += deltaX
-        y += deltaY
-    }
-}
-var somePoint = Point(x: 1. 0,  y: 1. 0)
-somePoint.moveByX(2. 0,  y: 3. 0)
-println("The point is now at  (\(somePoint.x),  \(somePoint.y))")
-//"The point is now at (3.0, 4.0)"
-let fixedPoint = Point(x: 3.0,  y: 3.0)
-2 fixedPoint.moveByX(2.0,  y: 3.0) //error：不可以在常量上使用mutating方法
-
-//mutating方法可以将类的实例赋值为self
-struct Point {
-	var x = 0.0, y = 0.0
-	mutating func moveByX(deltaX: Double, y deltaY: Double) {
-		self = Point(x: x + deltaX, y: y + deltaY)
-	}
-}
-
-
-
 
     extension Int: ExampleProtocol {
         var simpleDescription: String {
@@ -296,23 +171,7 @@ printLetterKinds("Hello")
 // 'Hello' is made up of the following kinds of letters:
 // consonant vowel consonant consonant vowel
 
-在类型名称后加上协议名称，中间以冒号:分隔即可实现协议；实现多个协议时，各协议之间用逗号,分隔，如下所示:
-struct SomeStructure: FirstProtocol, AnotherProtocol {
-    // 结构体内容
-}
 
-如果一个类在含有父类的同时也采用了协议，应当把父类放在所有的协议之前，如下所示:
-class SomeClass: SomeSuperClass, FirstProtocol, AnotherProtocol {
-    // 类的内容
-}
-如果协议要求属性是可读写的，那么这个属性不能是常量存储型属性或只读计算型属性；如果协议要求属性是只读的(gettable)，那么任意的属性都能满足协议的规定，在你的代码中，即使为只读属性实现了写方法(settable)也依然有效。
-
-通常在协议的定义中使用class前缀表示该属性为类成员；在枚举和结构体实现协议时中，需要使用static关键字作为前缀。
-protocol AnotherProtocol {
-    class var someTypeProperty: Int { get set }
-}
-
-协议中的方法支持变长参数(variadic parameter)，不支持参数默认值(default value)。
 
 用类实现协议中的mutating方法时，不用写mutating关键字;用结构体，枚举实现协议中的mutating方法时，必须写mutating关键字。
 
@@ -335,67 +194,15 @@ lightSwitch.toggle()
 //lightSwitch 现在的值为 .On
 
 
-通过扩展为已存在的类型遵循协议时，该类型的所有实例也会随之添加协议中的方法
-protocol TextRepresentable {
-    func asText() -> String
-}
-extension Dice: TextRepresentable {
-    func asText() -> String {
-        return "A \(sides)-sided dice"
-    }
-}
-
-当一个类型已经实现了协议中的所有要求，却没有声明时，可以通过扩展来补充协议声明:
-struct Hamster {
-    var name: String
-    func asText() -> String {
-        return "A hamster named \(name)"
-    }
-}
-extension Hamster: TextRepresentable {}
-
 协议类型可以被集合使用，表示集合中的元素均为协议类型:
 let things: TextRepresentable[] = [game,d12,simoTheHamster]
 for thing in things {
     println(thing.asText())
 }
 
-一个协议可由多个协议采用protocol<SomeProtocol， AnotherProtocol>这样的格式进行组合，称为协议合成(protocol composition)。协议合成并不会生成一个新协议类型，而是将多个协议合成为一个临时的协议，超出范围后立即失效。
-protocol Named {
-    var name: String { get }
-}
-protocol Aged {
-    var age: Int { get }
-}
-struct Person: Named, Aged {
-    var name: String
-    var age: Int
-}
-func wishHappyBirthday(celebrator: protocol<Named, Aged>) {
-    println("Happy birthday \(celebrator.name) - you're \(celebrator.age)!")
-}
-let birthdayPerson = Person(name: "Malcolm", age: 21)
-wishHappyBirthday(birthdayPerson)
-// 输出 "Happy birthday Malcolm - you're 21!
-
-
-@objc protocol HasArea {
-    var area: Double { get }
-}
-@objc用来表示协议是可选的，也可以用来表示暴露给Objective-C的代码，此外，@objc型协议只对类有效，因此只能在类中检查协议的一致性。
-is操作符用来检查实例是否遵循了某个协议。
-
-optional属性仅仅可以用于使用@objc属性标记过的协议。这样的结果就是仅仅类类型可以采用并符合包含可选成员要求的协议。
-
-为了限制协议的采用仅仅针对类类型，需要使用class_protocol属性标记整个协议声明。任意继承自标记有class_protocol属性协议的协议都可以智能地仅能被类类型采用。如果协议已经用object属性标记了，class_protocol属性就隐性地应用于该协议；没有必要再明确地使用class_protocol属性来标记该协议了。
 
 as?返回一个可选值，当实例遵循协议时，返回该协议类型;否则返回nil
 as用以强制向下转型。
-在协议中使用@optional关键字作为前缀来定义可选成员。
-@objc protocol CounterDataSource {
-    @optional func incrementForCount(count: Int) -> Int
-    @optional var fixedIncrement: Int { get }
-}
 
 内置函数swap
 
