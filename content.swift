@@ -1,74 +1,6 @@
-//不用在输入输出时引入library
-//不用写main方法
-//不用在每句话后写; 如果要在一行代码中写多个语句则必须写;
-//不用编写头文件(.h)和代码文件(.m)
 
-println("Hello")
 
-//定义变量使用var或者let，使用var表示变量，使用let表示定义常量
-let maximumNumberOfLoginAttempts = 10 //定义常量并赋值为10
-var currentLoginAttempt = 0 //定义变量，初始值为0
 
-//可以使用，间隔，在一行语句中定义多个变量
-var first = 1, second = 2, third = 3
-
-//显示声明使用 ：类型 的语法，Swift可以推断变量类型，所以一般不在定义变量时显示指明类型
-var explicitDouble : Double = 70;
-
-//变量无法隐式转换，需在前面加需要转换的类型
-let label = "The width is"
-let width = 94
-let widthLabel  = label  + String(width)
-
-//另一种方式（String Interpolation），使用\(variable)
-//在括号中不可以再出现转义的单引号或反斜杠等，并且不能包含回车和换行
-let appleCount = 3
-let applePhrase = "I have \(appleCount) apples"
-
-//类型以大写字母开头，分为有符号和无符号两种，如Int32, UInt64, Int8（-128-127）, UInt8（0-255）
-//如果使用Int，则类型由CPU决定，如果是32位系统则为Int32，否则为Int64
-//一般情况下使用Int，除非是确定需要只针对某平台的编程
-
-//获取类型的最大和最小值
-let minValue = UInt8.min;
-let maxValue = UInt8.max;
-
-//定义十进制数，不带前缀
-//定义二进制数，以0b前缀
-//定义八进制数，以0o前缀
-//定义十六进制数，以0x前缀
-let decimalInteger = 17
-let binaryInteger = 0b10001
-let octalInteger = 0o21
-let hexadecimalInteger = 0x11
-
-//十进制使用e表示10的次方
-1.25e2 //125.0
-
-//十六进制使用p表示2的此方
-0xFp2  //60.0
-
-//Float精确到小数点后6位，Decimal则可以精确到小数点后15位
-//定义浮点数时如果不显示指定类型，Swift总是会使用Double
-//当把浮点数转换为整形时，会直接截断小数位值
-
-//可以使用定义变量为元组，元组中可以包含多个且不同的类型，如：
-let http404Error = (404, "Not Found");
-
-//如果只需要元组的部分信息，则不需要的部分使用_即可，如：
-let (justCode, _) = http404Error //justCode的值为404
-
-//可以使用.数字索引取得元组中的信息，如：
-println(http404Error.0)
-
-//定义元组时可以指定名字
-let http200Error = (statusCode: 200, description: "OK")
-
-//可以使用元组.名字的方法取得元组信息
-println(http200Error.statusCode)
-
-//使用元组定义时，元组的值会分解为对应变量的值
-let (x,y) = (1,2)  // 等价于 let x = 1; let y = 2;
 
 let dollarSign = "\x24"        // $,   Unicode scalar U+0024
 let blackHeart = "\u2665"      // ♥,   Unicode scalar U+2665
@@ -139,7 +71,7 @@ let sideLength = optionalSquare?.sideLength;
 
 //String转Int可以使用toInt()方法，但是由于转换可能不成功，如"hello".toInt()，所以转换的结果是Int?
 
-//!表示确定这里的的strValue一定是非nil的
+//!表示确定这里的的strValue一定是非nil的，!作为标准库中命名类型ImplicitlyUnwrappedOptional<T>
 if strValue {
     let hashValue = strValue!.hashValue
 }
@@ -302,10 +234,13 @@ for var i=0; i<3; i++ {
 i
 
 //使用fuc定义函数，使用: 定义参数及类型，使用->定义返回类型
+//如果参数在函数 调用时被省略了，就会使用初始值。如果参数没有省略，那么它在函数调用是必须有自己的名字.举例来讲， f()和f(x:7)都是只有一个变量x的函数的有效调用，但是f(7)是非法的，因为它提供了一个值而不是名称。
 func greet(name: String, day: String) -> String {
 	return "Hello \(name), today is \(day)";
 }
 greet("bob", "monday");
+
+
 
 //函数参数默认是constant，所以不可以在函数内部对参数的值进行修改，否则会导致编译错误
 //如果要修改参数的值，需要在定义函数时设置参数为var
@@ -541,6 +476,8 @@ func chooseStepFunction(backwards: Bool ) -> (Int) -> Int {
 }
 
 //定义类使用class
+//类可以有指定和方便的构造器。当你声明任一中构造器时，你可以使用requierd变量来标记构造器，要求任意子类来重写它。指定类的构造器必须初始化类所有的已声明的属性， 它必须在子类构造器调用前被执行。
+//超类的属性和方法声明可以被当前类继承，但是超类声明的指定构造器却不能。这意味着，如果当前类重写了超类 的所有指定构造器，它就继承了超类的方便构造器。
 class Shape {
 	var numberOfSides = 0
 	func simpleDescription() -> String {
@@ -760,7 +697,8 @@ manager.data += "Some more data"
 println(manager.importer.fileName)
 //DataImporter实例已创建
 
-//2、Computed Property：有计算逻辑的属性（定义在class、struct和enum中），只能定义为var
+//2、Computed Property：有计算逻辑的
+（定义在class、struct和enum中），只能定义为var
 struct Point {
 	var x = 0. 0,  y = 0. 0
 }
@@ -941,6 +879,7 @@ var counter = Counter()
 counter.incrementBy(2, numberofTimes: 7)
 
 //使用enum定义枚举，枚举中可以定义方法，case关键字表示后面紧跟一行新的枚举值，一行可以定义多个枚举值
+//枚举类型并不提供隐式的初始构造器，所有构造器必须显式的声明。
 enum Card: Int {
 	//Swift中的枚举值不会默认为0,1,2...，而是需要手动设置
 	//Ace = 1表示枚举的初始值（Raw Value），当初始值为Int时，后面的枚举值会递增赋值
@@ -995,6 +934,13 @@ switch productBarcode {
 }
 
 //使用struct定义结构体，struct是值类型，class是引用类型
+//结构体可以包含任意数量的协议，但是不能继承自类，枚举或者其他结构体。
+
+
+有两种方法来创建已声明的类的实例：
+
+调用类的一个构造器，参见构造器(initializers)。
+如果没有声明构造器，而且类的所有属性都被赋予了初始值，调用类的默认构造器
 
 //在Swift中，class和struct非常类似：
 //1、都可以定义属性
@@ -1019,6 +965,7 @@ struct Resolution {
 var vga = Resolution(width: 640, height: 480)
 
 //默认情况下，值类型中的属性不能被方法修改，但是可以在方法前使用mutating关键字表示方法可以对值类型进行修改，并且把修改返回原始类型
+以self修饰的枚举或结构体方法必须以mutating关键字作为函数声明头。
 protocol ExampleProtocol {
 	var simpleDescription: String {get;}
 	mutating func adjust()
@@ -1427,6 +1374,11 @@ wishHappyBirthday(birthdayPerson)
 }
 @objc用来表示协议是可选的，也可以用来表示暴露给Objective-C的代码，此外，@objc型协议只对类有效，因此只能在类中检查协议的一致性。
 is操作符用来检查实例是否遵循了某个协议。
+
+optional属性仅仅可以用于使用@objc属性标记过的协议。这样的结果就是仅仅类类型可以采用并符合包含可选成员要求的协议。
+
+为了限制协议的采用仅仅针对类类型，需要使用class_protocol属性标记整个协议声明。任意继承自标记有class_protocol属性协议的协议都可以智能地仅能被类类型采用。如果协议已经用object属性标记了，class_protocol属性就隐性地应用于该协议；没有必要再明确地使用class_protocol属性来标记该协议了。
+
 as?返回一个可选值，当实例遵循协议时，返回该协议类型;否则返回nil
 as用以强制向下转型。
 在协议中使用@optional关键字作为前缀来定义可选成员。
@@ -1636,7 +1588,19 @@ let plusMinusVector = firstVector +- secondVector
 用作声明的关键字： class、deinit、enum、extension、func、import、init、let、protocol、static、struct、subscript、typealias、var
 用作语句的关键字： break、case、continue、default、do、else、fallthrough、if、in、for、return、switch、where、while
 
-dynamic表达式
+
+__FILE__	String	所在的文件名
+__LINE__	Int	所在的行数
+__COLUMN__	Int	所在的列数
+__FUNCTION__	String	所在的function 的名字
+
+
+在某个函数（function）中，__FUNCTION__ 会返回当前函数的名字。 在某个方法（method）中，它会返回当前方法的名字。 在某个property 的getter/setter中会返回这个属性的名字。 在init/subscript中 只有的特殊成员（member）中会返回这个keyword的名字，在某个文件的顶端（the top level of a file），它返回的是当前module的名字。
+
+
+类、结构体或枚举类型的元类型是相应的类型名紧跟.Type。协议类型的元类型——并不是运行时适配该协议的具体类型——是该协议名字紧跟.Protocol。比如，类SomeClass的元类型就是SomeClass.Type，协议SomeProtocol的元类型就是SomeProtocal.Protocol。
+
+你可以使用后缀self表达式来获取类型。比如，SomeClass.self返回SomeClass本身，而不是SomeClass的一个实例。同样，SomeProtocol.self返回SomeProtocol本身，而不是运行时适配SomeProtocol的某个类型的实例。还可以对类型的实例使用dynamicType表达式来获取该实例在运行阶段的类型
 
 class SomeBaseClass {
     class func printClassName（） {
@@ -1654,3 +1618,96 @@ let someInstance: SomeBaseClass = SomeSubClass（）
 // someInstance is of type SomeSubClass at runtime
 someInstance.dynamicType.printClassName（）
 // prints "SomeSubClass"
+
+
+柯里化函数或方法有着如下的形式：
+
+func function name(parameters)(parameters) -> return type {
+statements
+}
+以这种形式定义的函数的返回值是另一个函数。
+柯里化函数的函数类型从右向左组成一组。例如，函数类型Int -> Int -> Int可以被理解为Int -> (Int -> Int)——也就是说，一个函数传入一个Int然后输出作为另一个函数的输入，然后又返回一个Int。举例来说，下面的两个声明时等价的:
+
+func addTwoNumbers(a: Int)(b: Int) -> Int {
+    return a + b
+}
+func addTwoNumbers(a: Int) -> (Int -> Int) {
+    func addTheSecondNumber(b: Int) -> Int {
+        return a + b
+    }
+    return addTheSecondNumber
+}
+
+
+类的指定构造器将类的所有属性直接初始化。如果类有超类，它不能调用该类的其他构造器,它只能调用超类的一个
+指定构造器。如果该类从它的超类处继承了任何属性，这些属性在当前类内被赋值或修饰时，必须调用一个超类的
+指定构造器。
+
+指定构造器可以在类声明的上下文中声明，因此它不能用扩展声明的方法加入一个类中。
+
+结构体和枚举的构造器可以调用其他的已声明的构造器，委托其中一个或所有的构造器进行初始化过程。
+
+便利构造器可以将初始化过程委托给另一个便利构造器或类的一个指定构造器。这意味着，类的初始化过程必须 以一个将所有类属性完全初始化的指定构造器的调用作为结束。便利构造器不能调用超类的构造器。
+
+你可以使用required关键字，将便利构造器和指定构造器标记为每个子类的构造器都必须拥有的。因为指定构造器 不被子类继承，它们必须被立即执行。当子类直接执行所有超类的指定构造器(或使用便利构造器重写指定构造器)时， 必需的便利构造器可以被隐式的执行，亦可以被继承。你不需要为这些重写的构造器标注 overrride关键字。
+
+deinit不能出现在扩展中
+
+属性，方法，现存类型的构造器不能被它们类型的扩展所重写。
+
+相同优先级的非结合运算符，不可以互相邻接。例如，表达式1 < 2 < 3非法的。
+
+重载了复合赋值运算符的函数必需将它们的初始输入参数标记为inout
+@assignment func += (inout left: Vector2D, right: Vector2D) {
+	left = left + right
+}
+
+class_protocol
+该特性用于修饰一个协议表明该协议只能被类类型采用，如果你用objc特性修饰一个协议，class_protocol特性就会隐式地应用到该协议，因此无需显式地用class_protocol特性标记该协议。
+
+exported
+
+该特性用于修饰导入声明，以此来导出已导入的模块，子模块，或当前模块的声明。如果另一个模块导入了当前模块，那么那个模块可以访问当前模块的导出项。
+
+final
+
+该特性用于修饰一个类或类中的属性，方法，以及下标成员。如果用它修饰一个类，那么这个类则不能被继承。如果用它修饰类中的属性，方法或下标，则表示在子类中，它们不能被重写。
+
+noreturn
+
+该特性用于修饰函数或方法声明，表明该函数或方法的对应类型，T，是@noreturn T。你可以用这个特性修饰函数或方法的类型，这样一来，函数或方法就不会返回到它的调用者中去。
+
+对于一个没有用noreturn特性标记的函数或方法，你可以将它重写(override)为用该特性标记的。相反，对于一个已经用noreturn特性标记的函数或方法，你则不可以将它重写为没使用该特性标记的。相同的规则试用于当你在一个comforming类型中实现一个协议方法时。
+
+objc
+
+该特性用于修饰任意可以在Objective-C中表示的声明，比如，非嵌套类，协议，类和协议中的属性和方法（包含getter和setter），初始化器，析构器，以下下标。objc特性告诉编译器该声明可以在Objective-C代码中使用。
+如果你将objc特性应用于一个类或协议，它也会隐式地应用于那个类或协议的成员。对于标记了objc特性的类，编译器会隐式地为它的子类添加objc特性。标记了objc特性的协议不能继承自没有标记objc的协议。
+objc特性有一个可选的参数，由标记符组成。当你想把objc所修饰的实体以一个不同的名字暴露给Objective-C，你就可以使用这个特性参数。你可以使用这个参数来命名类，协议，方法，getters，setters，以及初始化器。下面的例子把ExampleClass中enabled属性的getter暴露给Objective-C，名字是isEnabled，而不是它原来的属性名。
+
+@objc
+class ExampleClass {
+    var enabled: Bool {
+    @objc(isEnabled) get {
+        // Return the appropriate value
+    }
+    }
+}
+
+auto_closure
+
+这个特性通过自动地将表达式封闭到一个无参数闭包中来延迟表达式的求值。使用该特性修饰无参的函数或方法类型，返回表达式的类型。一个如何使用auto_closure特性的例子。
+
+//你可以对函数类型应用带有参数类型()并返回表达式类型的auto_closure属性（见类型属性章节）。一个自动闭包函数捕获特定表达式上的隐式闭包而非表达式本身。下面的例子使用auto_closure属性来定义一个很简单的assert函数：
+func simpleAssert(condition: @auto_closure () -> Bool, message: String){
+    if !condition(){
+        println(message)
+    }
+}
+let testNumber = 5
+simpleAssert(testNumber % 2 == 0, "testNumber isn't an even number.")
+// prints "testNumber isn't an even number."
+
+noreturn
+
+该特性用于修饰函数或方法的类型，表明该函数或方法不会返回到它的调用者中去。你也可以用它标记函数或方法的声明，表示函数或方法的相应类型，T，是@noreturn T。
