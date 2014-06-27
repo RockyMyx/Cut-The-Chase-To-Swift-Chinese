@@ -156,14 +156,6 @@ class EquilateralTriangle : Shape {
 }
 
 
-
-
-
-
-//
-
-
-
 //在Swift中，class和struct非常类似：
 //1、都可以定义属性
 //2、都可以定义函数
@@ -225,225 +217,21 @@ struct Point {
 		self = Point(x: x + deltaX, y: y + deltaY)
 	}
 }
-//对于枚举的mutating方法，可以将self赋值为同一枚举中的不同成员
-enum TriStateSwitch {
-	case Off, Low, High
-	mutating func next() {
-	    switch self {
-	    case Off:
-	        self = Low
-	    case Low :
-	        self = High
-	    case High:
-			self = Off
-	}
-}
-var ovenLight = TriStateSwitch.Low
-ovenLight.next()
-// ovenLight is now equal to .High
-ovenLight.next()
-// ovenLight is now equal to .Off
 
-//创建类型方法（Type Methods）：在类中使用class关键字，在值类型中使用static关键字
-//Objective-C中只可以为类定义Type Methods
 
-//可以在类中定义索引，从而通过[index]语法访问相应元素
-subscipt(index: Int) -> Int {
-	get {
 
-	}
-	//newValue可以省略不写
-	set(newValue) {
 
-	}
-}
-//索引访问也可以定义为只读的：
-struct TimesTable {
-    let multiplier: Int
-    subscript(index: Int) -> Int {
-        return multiplier * index
-    }
-}
-let threeTimesTabl e = TimesTable(multiplier: 3)
-println("six times three is \(threeTimesTable[6])")
-//subscript可以使用变量或者可变参数，但是不能使用inout参数或者有默认值的参数
-//subscript可以重载，可以定义多个参数
-struct Matrix {
-    let rows: Int,  columns: Int
-    var grid: Double[]
-    init(rows: Int, columns: Int) {
-        self. rows = rows
-        self. columns = columns
-        grid = Array(count: rows * columns,  repeatedValue: 0.0)
-    }
-    func indexIsValidForRow (row: Int, column: Int) -> Bool  {
-		return row >= 0 && row < rows && column >= 0 && column < columns
-	}
-	subscript(row: Int, column: Int) -> Doubl e {
-		get {
-			assert(indexIsValidForRow(row, column: column), "Index out of range")
-			return grid[(row * columns) + column]
-		}
-		set {
-			assert(indexIsValidForRow(row , column: column), "Index out of range")
-			grid[(row * columns) + column] = newValue
-		}
-	}
-}
-Matrix matrix = Matrix(2, 2)
-//grid = [0.0, 0.0, 0.0 ,0.0]
-matrix(0, 1) = 1.5
-matrix(1, 0) = 3.2
-/*matrix = [ 0.0, 1.5
-             3.2, 0.0 ] */
-
-struct SimpleStructure: ExampleProtocol {
-    var simpleDescription: String = "A simple structure"
-    mutating func adjust() {
-        simpleDescription += " (adjusted)"
-    }
-}
-var b = SimpleStructure()
-b.adjust()
-let bDescription = b.simpleDescription
-
-let protocolValue: ExampleProtocol = a
-protocolValue.simpleDescription
-
-//类型的扩展方法：extension
-extension Int: ExampleProtocol {
-	var simpleDescription: String {
-		return "The number \(self)"
-	}
-	mutating func adjust() {
-		self += 42
-	}
-}
-
-//泛型
-func repeat<ItemType>(item: ItemType, times: Int) -> ItemType[] {
-	var result = ItemType[]();
-	for i in 0..times {
-		result += item
-	}
-	return result;
-}
-
-//使用where指明泛型类的约束条件
-//除了where，还可以在泛型参数后面写冒号类名或protocol名，如使用<T: Equatable>
-Equatabl e>.
-func anyCommonElements <T, U where T: Sequence, U: Sequence, T.GeneratorType.Element: Equatable,
-                                   T.GeneratorType.Element == U.GeneratorType.Element> (lhs: T, rhs: U) -> Bool {
-    for lhsItem in lhs {
-        for rhsItem in rhs {
-            if lhsItem == rhsItem {
-                return true
-            }
+    extension Int: ExampleProtocol {
+        var simpleDescription: String {
+            return "The number \(self)"
+        }
+        mutating func adjust() {
+            self += 42
         }
     }
-    return false
-}
-anyCommonElements([1, 2, 3], [3, 4, 5])
 
 
-//用类型检查操作符(is)来检查一个实例是否属于特定子类型。若实例属于那个子类型，类型检查操作符返回 true ，否则返回 false 。
-//向下类型转换使用as，如果不确定是否转换成功，可以使用as?
 
-//Swift为不确定类型提供了两种特殊类型别名：
-//AnyObject可以代表任何class类型的实例。
-//Any可以表示任何类型，除了方法类型（function types）。
-//当需要在工作中使用 Cocoa APIs，它一般接收一个AnyObject[]类型的数组，或者说“一个任何对象类型的数组”。这是因为 Objective-C 没有明确的类型化数组。但是，你常常可以确定包含在仅从你知道的 API 信息提供的这样一个数组中的对象的类型。
-
-var things = Any[]()
-
-things.append(0)
-things.append(0.0)
-things.append(42)
-things.append(3.14159)
-things.append("hello")
-things.append((3.0, 5.0))
-things.append(Movie(name: "Ghostbusters", director: "Ivan Reitman"))
-
-for thing in things {
-    switch thing {
-    case 0 as Int:
-        println("zero as an Int")
-    case 0 as Double:
-        println("zero as a Double")
-    case let someInt as Int:
-        println("an integer value of \(someInt)")
-    case let someDouble as Double where someDouble > 0:
-        println("a positive double value of \(someDouble)")
-    case is Double:
-        println("some other double value that I don't want to print")
-    case let someString as String:
-        println("a string value of \"\(someString)\"")
-    case let (x, y) as (Double, Double):
-        println("an (x, y) point at \(x), \(y)")
-    case let movie as Movie:
-        println("a movie called '\(movie.name)', dir. \(movie.director)")
-    default:
-        println("something else")
-    }
-}
-
-//在一个switch语句的case中使用强制形式的类型转换操作符（as, 而不是 as?）来检查和转换到一个明确的类型。在 switch case 语句的内容中这种检查总是安全的。
-
-
-//Swift允许你定义嵌套类型，可以在枚举类型、类和结构体中定义支持嵌套的类型。
-
-//扩展就是向一个已有的类、结构体或枚举类型添加新功能（functionality）。这包括在没有权限获取原始源代码的情况下扩展类型的能力（即逆向建模）。扩展和 Objective-C 中的分类（categories）类似。（不过与Objective-C不同的是，Swift 的扩展没有名字。）
-
-//Swift 中的扩展可以：添加计算型属性和计算静态属性；定义实例方法和类型方法；提供新的构造器；定义下标；定义和使用新的嵌套类型；使一个已有类型符合某个协议
-
-//对于类进行扩展时，要完全按照类或结构体的定义方式写：
-extension SomeType: SomeProtocol, AnotherProctocol {
-    // 协议实现写到这里
-}
-
-扩展可以添加新的计算属性，但是不可以添加存储属性，也不可以向已有属性添加属性观测器(property observers)。
-
-扩展能向类中添加新的便利构造器，但是它们不能向类中添加新的指定构造器或析构函数。指定构造器和析构函数必须总是由原始的类实现来提供。
-
-如果你使用扩展向一个值类型添加一个构造器，在该值类型已经向所有的存储属性提供默认值，而且没有定义任何定制构造器（custom initializers）时，你可以在值类型的扩展构造器中调用默认构造器(default initializers)和逐一成员构造器(memberwise initializers)。  
-正如在值类型的构造器委托中描述的，如果你已经把构造器写成值类型原始实现的一部分，上述规则不再适用。
-
-
-struct Size {
-    var width = 0.0, height = 0.0
-}
-struct Point {
-    var x = 0.0, y = 0.0
-}
-struct Rect {
-    var origin = Point()
-    var size = Size()
-}
-extension Rect {
-    init(center: Point, size: Size) {
-        let originX = center.x - (size.width / 2)
-        let originY = center.y - (size.height / 2)
-        self.init(origin: Point(x: originX, y: originY), size: size)
-    }
-}
-let centerRect = Rect(center: Point(x: 4.0, y: 4.0), size: Size(width: 3.0, height: 3.0))
-// centerRect的原点是 (2.5, 2.5)，大小是 (3.0, 3.0)
-
-扩展可以向已有类型添加新的实例方法和类型方法。下面的例子向Int类型添加一个名为repetitions的新实例方法：
-
-extension Int {
-    func repetitions(task: () -> ()) {
-        for i in 0..self {
-            task()
-        }
-    }
-}
-
-3.repetitions({println("Hello!")})
-//或者3.repetitions{println("Hello!")}
-// Hello!
-// Hello!
-// Hello!
 
 结构体和枚举类型中修改self或其属性的方法必须将该实例方法标注为mutating 
 extension Int {
