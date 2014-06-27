@@ -1,0 +1,49 @@
+switch接受任何类型的参数，且分支语句不用break
+
+let anotherPoint = (2,  0)
+switch anotherPoint {
+	//表示匹配任何y值为0的点，并且定义x为常量，值为相应匹配的值2
+	case (let x, 0):
+		println("on the x-axi s w i th an x val ue of \(x)")
+	case (0,  let y):
+	    printl n("on the y-axi s w i th a y val ue of \(y)")
+	case let (x, y):
+	    println("somew here el se at (\(x),  \(y))")
+}
+
+还可以在case后加where进行额外的判断
+case let(x, y) where x == y : ...
+
+如果case语句没有穷举所有情况，则必须加default，否则可以省略
+
+在switch中有continue，break，fallthrough和return四种控制循环的方式，fallthrough会在执行完当前case语句后自动跳到下一个case语句或default中
+
+//可以在循环语句中加入占位符进行控制
+gameLoop: while square ! = finalSquare {
+    if ++diceRoll  == 7 { diceRoll  = 1 }
+    switch square + diceRoll  {
+	    case finalSquare:
+	        break gameLoop
+	    case let new Square where new Square > final Square:
+	        continue gameLoop
+		default:
+			square += diceRoll
+			square += board[square]
+	}
+}
+
+//if语句可以使用动态绑定，optionalName为nil，则条件为false
+if let name = optionalName {
+	println("Hello, \(name)");
+}
+
+if语句的条件必须为false或true，其他类型不会隐式转换
+let i = 1
+if i { ... } //error
+if i == 1 { ... } //ok
+
+//循环的条件可以在最后出现，从而确保循环至少运行一次
+for var i=0; i<3; i++ {
+	println(i);
+}
+i
